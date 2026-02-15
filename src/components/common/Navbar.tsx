@@ -15,14 +15,14 @@ export default function Navbar() {
         href: string;
         role: "buyer" | "dealer" | "admin";
     }> = [
-        { name: "Marketplace", href: "/", role: "buyer" },
-        { name: "Sell Bike", href: "/sell", role: "buyer" },
-        { name: "Auctions", href: "/auctions", role: "buyer" },
-        { name: "Dealer Dashboard", href: "/dealer/dashboard", role: "dealer" },
-        { name: "Inventory", href: "/dealer/inventory", role: "dealer" },
-        { name: "Live Leads", href: "/dealer/leads", role: "dealer" },
-        { name: "Admin Panel", href: "/admin", role: "admin" }
-    ];
+            { name: "Marketplace", href: "/", role: "buyer" },
+            { name: "Sell Bike", href: "/sell", role: "buyer" },
+            { name: "Auctions", href: "/auctions", role: "buyer" },
+            { name: "Dealer Dashboard", href: "/dealer/dashboard", role: "dealer" },
+            { name: "Inventory", href: "/dealer/inventory", role: "dealer" },
+            { name: "Live Leads", href: "/dealer/leads", role: "dealer" },
+            { name: "Admin Panel", href: "/admin", role: "admin" }
+        ];
 
     const filteredLinks = navLinks.filter(
         (link) => link.role === activeRole || link.role === "buyer"
@@ -88,10 +88,13 @@ export default function Navbar() {
                             Post Bike
                         </Link>
 
-                        <button className="flex items-center gap-2 rounded-full bg-white/5 px-3 py-1.5 text-sm font-medium text-white hover:bg-white/10 transition-colors border border-white/5">
+                        <Link
+                            href="/auth/login"
+                            className="flex items-center gap-2 rounded-full bg-white/5 px-3 py-1.5 text-sm font-medium text-white hover:bg-white/10 transition-colors border border-white/5"
+                        >
                             <User className="h-4 w-4" />
                             <span>Login</span>
-                        </button>
+                        </Link>
                     </div>
 
                     {/* Mobile Menu Button */}
