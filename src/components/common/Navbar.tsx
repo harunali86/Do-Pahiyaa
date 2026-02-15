@@ -150,10 +150,13 @@ export default function Navbar() {
                             >
                                 Post Bike
                             </Link>
-                            <button className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-3 py-2 text-sm font-medium text-white hover:bg-brand-500 transition-colors shadow-lg shadow-brand-500/20">
+                            <Link
+                                href="/auth/login"
+                                className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-3 py-2 text-sm font-medium text-white hover:bg-brand-500 transition-colors shadow-lg shadow-brand-500/20"
+                            >
                                 <User className="h-4 w-4" />
                                 <span>Login / Register</span>
-                            </button>
+                            </Link>
                         </div>
                     </div>
                 </div>
