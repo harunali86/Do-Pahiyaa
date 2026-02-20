@@ -26,6 +26,22 @@ export default function Navbar() {
     useEffect(() => {
         const getUser = async () => {
             const { data: { session } } = await supabase.auth.getSession();
+
+            // --- DEMO MODE UI MOCKING ---
+            const isDemoMode = true;
+            if (isDemoMode && !session?.user) {
+                const demoSession = document.cookie.split('; ').find(row => row.startsWith('demo-session='))?.split('=')[1];
+                if (demoSession) {
+                    setUser({
+                        id: 'demo-id',
+                        user_metadata: { full_name: demoSession === 'admin' ? 'Demo Admin' : 'Demo Dealer' }
+                    });
+                    setUserRole(demoSession as UserRole);
+                    return;
+                }
+            }
+            // ---------------------------
+
             setUser(session?.user ?? null);
 
             // Fetch user role from profiles table (via Server Action)
@@ -36,6 +52,7 @@ export default function Navbar() {
             }
         };
         getUser();
+
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             setUser(session?.user ?? null);

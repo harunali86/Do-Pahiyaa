@@ -4,9 +4,23 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export async function getUserRoleAction() {
+    const isDemoMode = true; // Match src/proxy.ts
     const supabase = await createSupabaseServerClient();
-
     const { data: { session } } = await supabase.auth.getSession();
+
+    // --- DEMO MODE ROLE MOCKING ---
+    if (isDemoMode && !session?.user) {
+        // We check a 'demo-session' cookie set during our mock login
+        const { cookies } = await import("next/headers");
+        const cookieStore = await cookies();
+        const demoSession = cookieStore.get("demo-session")?.value;
+
+        if (demoSession === 'admin') return 'admin';
+        if (demoSession === 'dealer') return 'dealer';
+        return 'user';
+    }
+    // ------------------------------
+
     if (!session?.user) return null;
 
     const { data: profile } = await supabase
@@ -17,6 +31,7 @@ export async function getUserRoleAction() {
 
     return profile?.role || "user";
 }
+
 
 export async function getProfileAction() {
     const supabase = await createSupabaseServerClient();
