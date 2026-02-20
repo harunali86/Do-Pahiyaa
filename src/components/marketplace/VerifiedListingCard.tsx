@@ -29,10 +29,18 @@ interface VerifiedListingCardProps {
     listing: ListingCardData;
 }
 
+const FALLBACK_VERIFIED_IMAGE =
+    "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=800&q=80";
+
+function isNonEmptyString(value: unknown): value is string {
+    return typeof value === "string" && value.trim().length > 0;
+}
+
 export default function VerifiedListingCard({ listing }: VerifiedListingCardProps) {
-    const imageUrl = listing.images && listing.images.length > 0
-        ? listing.images[0]
-        : "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=800&q=80"; // Fallback
+    const normalizedImages = Array.isArray(listing.images)
+        ? listing.images.filter(isNonEmptyString)
+        : [];
+    const imageUrl = normalizedImages[0] ?? FALLBACK_VERIFIED_IMAGE;
 
     return (
         <div className="group relative overflow-hidden rounded-2xl bg-slate-900/50 border border-brand-500/20 hover:border-brand-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-brand-500/10">

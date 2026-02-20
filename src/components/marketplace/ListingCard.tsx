@@ -32,16 +32,28 @@ interface ListingCardProps {
     listing: CardListing;
 }
 
+const FALLBACK_LISTING_IMAGE =
+    "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=800&q=80";
+
+function isNonEmptyString(value: unknown): value is string {
+    return typeof value === "string" && value.trim().length > 0;
+}
+
 export default function ListingCard({ listing }: ListingCardProps) {
-    // Shared Normalization with Type Guarding
-    const hasImages = 'images' in listing && listing.images && listing.images.length > 0;
-    const imageUrl = hasImages
-        ? (listing as any).images[0]
-        : ((listing as any).imageUrl || "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=800&q=80");
+    const normalizedImages = Array.isArray((listing as any).images)
+        ? (listing as any).images.filter(isNonEmptyString)
+        : [];
+    const fallbackImage = isNonEmptyString((listing as any).imageUrl)
+        ? (listing as any).imageUrl
+        : FALLBACK_LISTING_IMAGE;
+    const imageUrl = normalizedImages[0] ?? fallbackImage;
 
     const kmsDisplay = ((listing as any).kms_driven ?? (listing as any).kms ?? 0).toLocaleString();
     const condition = listing.condition || "Verified";
-    const rating = listing.rating ? listing.rating.toFixed(1) : "4.8";
+    const ratingValue = typeof listing.rating === "number" && Number.isFinite(listing.rating)
+        ? listing.rating
+        : 4.8;
+    const rating = ratingValue.toFixed(1);
     const ownerType = listing.ownerType || ((listing as any).is_company_listing ? "Certified" : "Individual");
     const postedByLabel = listing.postedBy === "Dealer" ? "Dealer" : "";
     return (

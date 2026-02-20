@@ -84,31 +84,43 @@ async function seed() {
         }
     ]);
 
-    // 5. Insert Mock Listings
-    console.log(`🏍️ Inserting ${demoListings.length} mock listings...`);
-    const listingsToInsert = demoListings.map(l => ({
-        seller_id: demoDealerId,
-        title: l.title,
-        make: l.brand,
-        model: l.model,
-        year: l.year,
-        price: l.price,
-        kms_driven: l.kms,
-        city: l.city,
-        description: l.description,
-        status: 'published',
-        images: [l.imageUrl],
-        specs: l.specs,
-        is_company_listing: l.postedBy === 'Dealer'
-    }));
+    // 4. Generate & Insert massive listing data (180+ bikes)
+    const cities = ["Bengaluru", "Delhi", "Mumbai", "Hyderabad", "Chennai", "Pune", "Ahmedabad", "Jaipur", "Lucknow", "Kochi"];
+    const massiveListings: any[] = [];
 
-    const { error: listingError } = await supabase.from('listings').insert(listingsToInsert);
+    console.log('🏍️ Generating 180+ mock listings across India...');
 
-    if (listingError) {
-        console.error('❌ Error inserting listings:', listingError.message);
-    } else {
-        console.log('✅ Seeding Complete! Site is now Demo-Ready.');
+    for (let i = 0; i < 185; i++) {
+        const base = demoListings[i % demoListings.length];
+        const city = cities[i % cities.length];
+        const priceOffset = (i % 5) * 5000 - 10000;
+        const kmsOffset = (i % 7) * 450;
+
+        massiveListings.push({
+            seller_id: i % 2 === 0 ? demoAdminId : demoDealerId,
+            title: `${base.title} (${i + 1})`,
+            make: base.brand,
+            model: base.model,
+            year: base.year - (i % 3),
+            price: base.price + priceOffset,
+            kms_driven: base.kms + kmsOffset,
+            city: city,
+            description: base.description,
+            images: [base.imageUrl],
+            status: 'published',
+            is_company_listing: i % 3 === 0
+        });
+
     }
+
+    const { error: listingsError } = await supabase
+        .from('listings')
+        .insert(massiveListings);
+
+    if (listingsError) console.error('❌ Error inserting listings:', listingsError.message);
+    else console.log(`✅ Successfully inserted ${massiveListings.length} listings!`);
+
+    console.log('✅ Seeding Complete! Site is now MASSIVELY Demo-Ready.');
 }
 
 seed();
