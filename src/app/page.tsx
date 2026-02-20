@@ -32,16 +32,36 @@ export default async function Home() {
 
 
 
-    // PRESERVE MOCK DATA FOR DEMO (Requested by User)
-    const realListings = normalizeListings(demoListings.slice(0, 6));
-    const featuredListings = normalizeListings(demoListings.slice(6, 9));
-    const recentListings = normalizeListings(demoListings.slice(0, 3));
+    // 1. Try to fetch REAL data from Supabase
+    let realListings: any[] = [];
+    let featuredListings: any[] = [];
+    let recentListings: any[] = [];
     let localListings: any[] = [];
 
-    // Optional: Try to fetch real city data, but fallback to mock immediately if it fails or is empty
-    if (selectedCity && selectedCity !== "All India") {
+    try {
+      const { listings } = await ListingService.getListings({ limit: 9 });
+      if (listings && listings.length > 0) {
+        realListings = normalizeListings(listings.slice(0, 6));
+        featuredListings = normalizeListings(listings.slice(6, 9));
+        recentListings = normalizeListings(listings.slice(0, 3));
+      } else {
+        // Fallback to mock if DB is empty
+        realListings = normalizeListings(demoListings.slice(0, 6));
+        featuredListings = normalizeListings(demoListings.slice(6, 9));
+        recentListings = normalizeListings(demoListings.slice(0, 3));
+      }
+    } catch (e) {
+      console.error("Home page DB fetch failed, falling back to mock:", e);
+      realListings = normalizeListings(demoListings.slice(0, 6));
+      featuredListings = normalizeListings(demoListings.slice(6, 9));
+      recentListings = normalizeListings(demoListings.slice(0, 3));
+    }
+
+    // 2. Local City Logic
+    if (selectedCity && selectedCity !== "All India" && realListings.length > 0) {
       localListings = realListings.slice(0, 3);
     }
+
 
     // FAQ Schema for AEO (Answer Engine Optimization)
     const faqJsonLd = {
