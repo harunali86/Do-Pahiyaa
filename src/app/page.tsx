@@ -50,12 +50,13 @@ export default async function Home() {
     const realListings = displayListings.slice(0, 6);
     const featuredListings = displayListings.slice(6, 9);
     const recentListings = displayListings.slice(0, 3);
-
+    let localListings: any[] = [];
 
     // 2. Local City Logic
-    if (selectedCity && selectedCity !== "All India" && realListings.length > 0) {
-      localListings = realListings.slice(0, 3);
+    if (selectedCity && selectedCity !== "All India" && displayListings.length > 0) {
+      localListings = displayListings.filter((l: any) => l.city === selectedCity).slice(0, 3);
     }
+
 
 
     // FAQ Schema for AEO (Answer Engine Optimization)
