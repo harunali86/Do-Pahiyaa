@@ -1,4 +1,8 @@
+export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic";
+
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { LeadService } from "@/lib/services/lead.service";
 import { ModerationTable } from "@/components/admin/moderation/ModerationTable";
 
 export default async function AdminModerationPage() {

@@ -1,3 +1,7 @@
+export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic";
+
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { AdminService } from "@/lib/services/admin.service";
 import { UsersClient } from "@/components/admin/UsersClient";
 

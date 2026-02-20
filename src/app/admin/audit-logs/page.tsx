@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { Clock, Search } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireAdminAccess } from "@/lib/auth/authorization";

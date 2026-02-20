@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ConfigService } from "@/lib/services/config.service";

@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 "use client";
 
 import { CheckCircle2, CreditCard, Download, ShieldCheck, Zap } from "lucide-react";
