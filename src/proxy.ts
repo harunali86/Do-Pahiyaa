@@ -30,7 +30,7 @@ export async function proxy(request: NextRequest) {
                         value: cookie.value,
                     }))
                 },
-                setAll(cookiesToSet) {
+                setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
                     cookiesToSet.forEach(({ name, value, options }) =>
                         request.cookies.set(name, value)
                     )
@@ -41,6 +41,7 @@ export async function proxy(request: NextRequest) {
                         response.cookies.set(name, value, options)
                     )
                 },
+
             },
         }
     )
