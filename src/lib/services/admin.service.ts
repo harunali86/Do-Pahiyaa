@@ -184,9 +184,7 @@ export class AdminService {
             .select(`
                 *,
                 dealers(business_name, subscription_status, credits_balance)
-            `, { count: "exact" })
-            .order("created_at", { ascending: false })
-            .range(from, to);
+            `, { count: "exact" });
 
         // Apply Role Filter
         if (params.role && params.role !== 'all') {
@@ -198,6 +196,12 @@ export class AdminService {
             const term = params.search;
             query = query.or(`full_name.ilike.%${term}%,email.ilike.%${term}%,phone.ilike.%${term}%`);
         }
+
+        // Apply Order & Range LAST
+        query = query
+            .order("created_at", { ascending: false })
+            .range(from, to);
+
 
         const { data, error, count } = await query;
 
