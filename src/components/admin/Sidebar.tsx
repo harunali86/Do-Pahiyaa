@@ -20,6 +20,7 @@ const adminLinks: Array<{ name: string; href: string; icon: typeof LayoutDashboa
     { name: "KYC Review", href: "/admin/kyc", icon: ShieldAlert },
     { name: "CRM (Leads)", href: "/admin/leads", icon: Users },
     { name: "Pricing Engine", href: "/admin/pricing", icon: SlidersHorizontal },
+    { name: "Lead Packs", href: "/admin/leads/subscriptions", icon: ShieldAlert }, // Reusing ShieldAlert or similar
     { name: "Moderation", href: "/admin/moderation", icon: ShieldAlert },
     { name: "Live Auctions", href: "/admin/auctions", icon: Gavel },
     { name: "Settings", href: "/admin/settings", icon: Settings },

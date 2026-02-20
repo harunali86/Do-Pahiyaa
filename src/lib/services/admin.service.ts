@@ -232,4 +232,150 @@ export class AdminService {
 
         return data || [];
     }
+
+    /**
+     * Get all dealer lead subscriptions (filter packs).
+     */
+    static async getAllSubscriptions(params: { page?: number; limit?: number; status?: string }) {
+        const admin = createSupabaseAdminClient();
+        const page = params.page || 1;
+        const limit = Math.min(params.limit || 20, 100);
+        const from = (page - 1) * limit;
+        const to = from + limit - 1;
+
+        let query = admin
+            .from("dealer_subscriptions")
+            .select(`
+                *,
+                dealer:profiles!dealer_id(full_name, dealer_info:dealers(business_name))
+            `, { count: "exact" });
+
+        if (params.status && params.status !== 'all') {
+            query = query.eq('status', params.status);
+        }
+
+        const { data, error, count } = await query
+            .order("created_at", { ascending: false })
+            .range(from, to);
+
+        if (error) {
+            console.error("getAllSubscriptions error:", error);
+            return { subscriptions: [], metadata: { total: 0, page, limit, totalPages: 0 } };
+        }
+
+        // Flatten dealer info for easier UI consumption
+        const subscriptions = (data || []).map((sub: any) => ({
+            ...sub,
+            business_name: sub.dealer?.dealer_info?.[0]?.business_name || sub.dealer?.full_name || "Unknown Dealer",
+            dealer_name: sub.dealer?.full_name
+        }));
+
+        return {
+            subscriptions,
+            metadata: {
+                total: count || 0,
+                page,
+                limit,
+                totalPages: Math.ceil((count || 0) / limit)
+            }
+        };
+    }
+
+    /**
+     * Get lead pricing configuration.
+     */
+    static async getLeadPricingConfig() {
+        const admin = createSupabaseAdminClient();
+        const { data, error } = await admin
+            .from("lead_pricing_config")
+            .select("*")
+            .maybeSingle();
+
+        if (error || !data) {
+            return {
+                base_lead_price: 1,
+                filtered_lead_surcharge: 0,
+                filtered_lead_multiplier: 1,
+                min_purchase_qty: 10,
+                filter_city_enabled: true,
+                filter_region_enabled: true,
+                filter_brand_enabled: true,
+                filter_model_enabled: true,
+                filter_lead_type_enabled: true,
+                filter_date_range_enabled: true
+            };
+        }
+        return data;
+    }
+
+    /**
+     * Update lead pricing configuration.
+     */
+    static async updateLeadPricingConfig(userId: string, data: any) {
+        const admin = createSupabaseAdminClient();
+        const { error } = await admin
+            .from("lead_pricing_config")
+            .upsert({
+                id: true,
+                ...data,
+                updated_by: userId,
+                updated_at: new Date().toISOString()
+            });
+
+        if (error) throw new Error(error.message);
+        return true;
+    }
+
+    /**
+     * Pricing Rules Management
+     */
+    static async getPricingRules() {
+        const admin = createSupabaseAdminClient();
+        const { data, error } = await admin
+            .from("pricing_rules")
+            .select("*")
+            .order("priority", { ascending: false });
+
+        if (error) return [];
+        return data || [];
+    }
+
+    static async savePricingRule(userId: string, rule: any) {
+        const admin = createSupabaseAdminClient();
+        const { error } = await admin
+            .from("pricing_rules")
+            .upsert({
+                ...rule,
+                created_by: rule.id ? undefined : userId,
+                updated_at: new Date().toISOString()
+            });
+
+        if (error) throw new Error(error.message);
+        return true;
+    }
+
+    static async deletePricingRule(ruleId: string) {
+        const admin = createSupabaseAdminClient();
+        const { error } = await admin
+            .from("pricing_rules")
+            .delete()
+            .eq("id", ruleId);
+
+        if (error) throw new Error(error.message);
+        return true;
+    }
+
+    /**
+     * Bulk Discounts Management
+     */
+    static async getBulkDiscounts() {
+        const admin = createSupabaseAdminClient();
+        const { data, error } = await admin
+            .from("pricing_bulk_discounts")
+            .select("*")
+            .order("min_quantity", { ascending: true });
+
+        if (error) return [];
+        return data || [];
+    }
 }

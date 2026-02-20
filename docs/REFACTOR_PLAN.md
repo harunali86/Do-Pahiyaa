@@ -1,169 +1,309 @@
-# Refactor Plan v2: System-Design Aligned Lead Engine
+# Refactor Plan v3: Lead Subscription & Auto-Allocation (Production Hardening)
 
-> **Objective**: Realign current implementation to `SYSTEM_DESIGN.md` so Do Pahiyaa operates as a **lead-driven marketplace SaaS** (not auction-centric demo), with clean architecture, strict security, and monetization via lead unlock + subscriptions.
-
----
-
-## 1) Hard Rules (Must Enforce)
-
-- **Service-layer only business logic**  
-  No DB logic inside UI or route handlers.  
-  Route handlers = parse/auth/validate + call services.
-
-- **Lead-first product behavior**  
-  Primary CTA is inquiry/contact unlock, not bidding.
-
-- **Schema-first delivery**  
-  DB schema + RLS + typed contracts are prerequisites for UI wiring.
-
-- **Security baseline mandatory**  
-  Zod validation, middleware role guard, rate limiting, audit logs before release.
+> Project: **Do Pahiyaa**  
+> Scope: **Existing codebase only** (no rebuild)  
+> Status: **Implementation-ready**  
+> Date: **2026-02-20**
 
 ---
 
-## 2) Target Architecture Delta
+## 1) Objective
 
-### 2.1 Required code structure
-- [ ] Add `src/app/api/` controllers:
-  - `src/app/api/listings/*`
-  - `src/app/api/leads/*`
-  - `src/app/api/webhooks/razorpay/*`
-- [ ] Add `src/lib/services/`:
-  - `listing.service.ts`
-  - `lead.service.ts`
-  - `billing.service.ts`
-  - `authz.service.ts` (role/permissions helper)
-- [ ] Add `src/lib/validations/` for Zod request schemas.
-- [ ] Add `src/types/database.types.ts` generated from Supabase schema.
-
-### 2.2 Demo data strategy
-- [ ] Keep `src/lib/demo/` temporarily as fallback.
-- [ ] Add `USE_MOCK_DATA` flag to switch source.
-- [ ] Remove demo dependency only after API-backed pages are stable.
+Deliver a production-grade **Dealer Filter Purchase + Real-time Auto-Allocation** workflow where:
+- Dealers pre-purchase lead quota with filters.
+- New leads are auto-assigned to matching active subscriptions.
+- Quota decrements atomically.
+- Pricing is fully admin-configurable (no hardcoded logic).
+- Existing lead/unlock flows remain backward-compatible.
 
 ---
 
-## 3) Database & Policy Refactor (Non-Negotiable)
+## 2) Product Decisions (Locked)
 
-### 3.1 Schema rollout (from SYSTEM_DESIGN)
-- [ ] Create/verify enums:
-  - `user_role`
-  - `listing_status`
-  - `lead_status`
-- [ ] Create/verify tables:
-  - `profiles`
-  - `dealers`
-  - `listings`
-  - `leads`
-  - `unlock_events`
-  - `subscriptions`
-- [ ] Create indexes from design doc for listing/search performance.
+1. **Allocation Mode**  
+   Default: `broadcast` (all matching dealers get lead allocation).
 
-### 3.2 RLS rollout
-- [ ] Profiles public-read + self-update.
-- [ ] Listings public-read only when published + owner manage.
-- [ ] Leads restricted:
-  - admin read
-  - dealer read only if unlocked via `unlock_events`.
-- [ ] Test RLS with anon, user, dealer, admin tokens.
+2. **Fairness Guardrail**  
+   Add config `max_dealers_per_lead` to cap fan-out in high-volume markets.
 
-### 3.3 Types & migrations
-- [ ] All schema changes through Supabase migrations only.
-- [ ] Generate `database.types.ts` after each migration change.
+3. **Matching Rule**  
+   Filters supported: `city`, `region`, `brand`, `model`, `lead_type`, `date_range`.
+
+4. **Cost Model**  
+   Filtered and unfiltered pricing both supported through DB config + pricing rules.
 
 ---
 
-## 4) API & Service Contracts
+## 3) In-Scope vs Out-of-Scope
 
-### 4.1 ListingService
-- [ ] `createListing(userId, input)`
-- [ ] `updateListing(userId, listingId, input)`
-- [ ] `searchListings(filters, pagination)`
-- [ ] `publishListing(userId, listingId)`
+**In scope**
+- Pricing engine hardening.
+- Dealer subscription purchase hardening.
+- Auto-allocation hardening.
+- Admin pricing/subscription operations UI.
+- Dealer subscription visibility improvements.
+- Auditability + testability.
 
-### 4.2 LeadService
-- [ ] `createLead(buyerId, listingId, message)`
-- [ ] `unlockLead(dealerId, leadId)` transactional:
-  - verify dealer role
-  - verify subscription/credits
-  - prevent duplicate unlock
-  - deduct credits
-  - insert unlock event
-  - return masked/unmasked contact payload as per policy
-
-### 4.3 BillingService
-- [ ] `syncSubscription(razorpayWebhookPayload)`
-- [ ] `checkDealerEntitlement(dealerId)`
-
-### 4.4 API endpoints (minimum)
-- [ ] `POST /api/leads`
-- [ ] `POST /api/leads/unlock`
-- [ ] `GET /api/listings`
-- [ ] `POST /api/listings`
-- [ ] `PATCH /api/listings/:id`
-- [ ] `POST /api/webhooks/razorpay`
+**Out of scope**
+- Auth redesign.
+- Payment gateway redesign.
+- Non-lead marketplace redesign.
 
 ---
 
-## 5) UI Refactor to Lead-First
+## 4) Database & Migration Plan
 
-### 5.1 Home (`src/app/page.tsx`)
-- [ ] Remove auction-first messaging/CTA priority.
-- [ ] Add lead-first sections:
-  - verified listings feed
-  - “Sell to verified dealers” funnel
-  - KPI: leads generated, unlocks, conversion
+## 4.1 Schema updates
 
-### 5.2 Listing Details (`src/app/listings/[id]/page.tsx`)
-- [ ] Primary CTA split by role:
-  - buyer/seller: `Send Inquiry`
-  - dealer: `Unlock Contact`
-- [ ] Modal states:
-  - inquiry submitted
-  - unlock success
+### A) `dealer_subscriptions`
+- Ensure fields exist:
+  - `filters jsonb`
+  - `is_unfiltered boolean`
+  - `total_quota int`
+  - `remaining_quota int`
+  - `price_paid_credits int`
+  - `price_per_lead numeric`
+  - `pricing_snapshot jsonb`
+  - `status text`
+  - `last_allocated_at timestamptz` (**new if missing**)
+- Indexes:
+  - `(status, remaining_quota)`
+  - `(dealer_id, status)`
+  - GIN index on `filters`.
+
+### B) `lead_allocations`
+- Keep `UNIQUE(lead_id, dealer_id)` (idempotency).
+- Add:
+  - `allocation_mode text` (broadcast/priority/exclusive)
+  - `allocated_at timestamptz default now()`
+- Indexes:
+  - `(lead_id)`
+  - `(dealer_id, allocated_at desc)`
+  - `(subscription_id)`.
+
+### C) `lead_pricing_config`
+- Ensure global knobs:
+  - `base_lead_price`
+  - `filtered_surcharge`
+  - `filtered_multiplier`
+  - `minimum_purchase_quantity`
+  - filter toggles (`city`, `region`, `brand`, `model`, `lead_type`, `date_range`)
+  - `allocation_mode` (**new**)
+  - `max_dealers_per_lead` (**new**).
+
+### D) `pricing_rules`, `pricing_bulk_discounts`, `city_region_map`
+- Keep active and admin-manageable.
+- Ensure priority indexes for deterministic application.
+
+### E) `purchase_requests` (**new table**)
+- Purpose: idempotent purchase handling.
+- Columns:
+  - `id uuid pk`
+  - `dealer_id uuid`
+  - `idempotency_key text unique`
+  - `request_payload jsonb`
+  - `response_payload jsonb`
+  - `created_at timestamptz`.
+
+---
+
+## 4.2 RLS & authorization rules
+
+- Dealer can read only own `dealer_subscriptions` and own `lead_allocations`.
+- Admin/Super Admin can CRUD pricing config, pricing rules, bulk discounts, city-region map.
+- RPC `purchase_subscription_v3` must enforce:
+  - caller is authenticated dealer
+  - `auth.uid()` maps to the same dealer account (do not trust client-passed dealer ID).
+
+---
+
+## 4.3 Migration order
+
+1. Add hardening migration (`*_lead_subscription_hardening.sql`).
+2. Add idempotency migration (`*_purchase_idempotency.sql`).
+3. Update pricing/allocation RPCs to `v3`.
+4. Backfill `last_allocated_at` where needed.
+5. Regenerate typed DB contracts.
+
+---
+
+## 5) Backend Module Changes
+
+## 5.1 `src/lib/services/pricing.service.ts`
+- Keep `calculatePrice`.
+- Upgrade purchase flow to call `purchase_subscription_v3` with `idempotency_key`.
+- Reject stale totals (`expected_total` mismatch).
+
+## 5.2 `src/lib/services/lead.service.ts`
+- Use `allocate_new_lead_v3` on lead creation.
+- Pass normalized lead attributes (`city`, `region`, `brand`, `model`, `lead_type`, `created_at`).
+- Emit notifications for newly auto-unlocked leads.
+
+## 5.3 `src/lib/services/admin.service.ts`
+- Add/verify:
+  - `getAllSubscriptions()`
+  - `getLeadPricingConfig()`
+  - `updateLeadPricingConfig(data)`
+  - `getPricingRules()`
+  - `savePricingRule(rule)`
+  - `deletePricingRule(id)`
+- Ensure heavy queries use aggregate RPCs / indexed queries only.
+
+---
+
+## 6) RPC/SQL Contract Changes
+
+## 6.1 `calculate_subscription_price_v3(p_filters, p_quantity)`
+- Deterministic rule evaluation:
+  1) base price
+  2) filtered surcharge/multiplier
+  3) conditional rules by priority
+  4) bulk discount
+- Returns full price breakdown for UI.
+
+## 6.2 `purchase_subscription_v3(p_filters, p_quota, p_expected_total, p_idempotency_key)`
+- Steps (single transaction):
+  1) Validate dealer identity via `auth.uid()`.
+  2) Check/record idempotency request.
+  3) Compute current price.
+  4) Validate expected total.
+  5) Lock dealer credit row (`FOR UPDATE`).
+  6) Deduct credits.
+  7) Insert subscription with snapshot.
+  8) Persist response in `purchase_requests`.
+
+## 6.3 `allocate_new_lead_v3(p_lead_id, p_lead_attributes, p_lead_created_at)`
+- Read allocation strategy from `lead_pricing_config`.
+- Find matching active subscriptions.
+- Respect `max_dealers_per_lead`.
+- For each selected subscription call atomic allocator.
+
+## 6.4 `allocate_lead_to_sub_v2(...)`
+- Keep quota lock (`FOR UPDATE`).
+- Insert `unlock_events` with `cost_credits = 0` for pre-paid lead.
+- Update `remaining_quota`, `status`, `last_allocated_at`.
+- Return boolean success.
+
+---
+
+## 7) Admin Panel UI Plan
+
+## 7.1 New/Updated components
+- `src/components/admin/leads/AdminSubscriptionTable.tsx` (**new**)
+  - Search by dealer/filter/status.
+  - Columns: dealer, filters, quota, remaining, utilization, status, last allocation.
+
+- `src/components/admin/pricing/AdminPricingManager.tsx` (**new**)
+  - Global config editor.
+  - Filter enable/disable toggles.
+  - Bulk discount tier management.
+  - Custom pricing rule CRUD.
+
+## 7.2 New pages
+- `src/app/admin/leads/subscriptions/page.tsx` (**new**)
+- `src/app/admin/leads/pricing/page.tsx` (**new**)  
+  (can link/redirect to existing `admin/pricing` route if preferred).
+
+---
+
+## 8) Dealer Panel UI Plan
+
+- Update `ActiveSubscriptions` UI:
+  - show `remaining_quota / total_quota`
+  - show `last_allocated_at`
+  - show `Auto-Allocation Active` badge
+  - show filter chips and per-lead effective price snapshot.
+
+---
+
+## 9) Realtime & Notifications
+
+- On new lead creation:
+  1) lead insert
+  2) allocation RPC
+  3) unlock_event + lead_allocation writes
+  4) dealer notification insert
+  5) realtime payload to dealer lead inbox.
+
+- Add “auto-allocated lead” notification type.
+
+---
+
+## 10) Performance Plan
+
+- Avoid loading full transaction history in admin dashboards.
+- Use aggregate RPCs for revenue/subscription metrics.
+- Add pagination + server-side filtering in admin subscriptions page.
+- Add query indexes listed in section 4.
+
+---
+
+## 11) Testing Checklist
+
+## 11.1 Automated
+- Pricing calculation unit tests:
+  - base-only
+  - filtered surcharge
+  - rule priority
+  - bulk discount
+  - minimum quantity rejection
+- Purchase integration tests:
+  - success path
+  - stale expected total
   - insufficient credits
+  - idempotency retry returns same result
+  - unauthorized dealer blocked
+- Allocation integration tests:
+  - one lead matching multiple subscriptions
+  - quota decrement per match
+  - duplicate allocation blocked by unique constraint
+  - exhausted subscription skipped
+  - `max_dealers_per_lead` cap enforced
+- Regression:
+  - manual unlock flow still works
+  - existing dealer lead pages still render.
 
-### 5.3 Dealer Dashboard (`src/app/dealer/dashboard/page.tsx`)
-- [ ] Lead inbox focus:
-  - new leads
-  - unlocked leads
-  - conversion funnel
-  - credit balance + burn rate
-- [ ] Remove bid/auction-centric artifacts from primary dashboard path.
-
----
-
-## 6) Security & Compliance Tasks
-
-- [ ] Add middleware role guard:
-  - `/admin/*` => admin only
-  - `/dealer/*` => dealer/admin
-- [ ] Add strict Zod validators for every POST/PATCH API.
-- [ ] Add rate limiting on auth + lead creation + unlock endpoints.
-- [ ] Add audit log events for:
-  - lead unlock
-  - listing publish/reject
-  - admin actions
+## 11.2 Manual
+1. Dealer buys pack (`City: Pune`, quota 50) and sees balance reduced.
+2. New Pune lead enters system.
+3. Dealer unlocked lead appears automatically.
+4. `dealer_subscriptions.remaining_quota` decrements.
+5. Admin sees subscription utilization update.
+6. Admin edits pricing and next purchase uses new rate.
 
 ---
 
-## 7) Execution Order (Corrected)
+## 12) Rollout & Rollback
 
-1. **Schema + RLS + migrations**  
-2. **Generate DB types**  
-3. **Implement services** (`listing`, `lead`, `billing`)  
-4. **Implement API controllers + validations**  
-5. **Wire lead-first UI to APIs**  
-6. **Apply security middleware + rate limits + audit logs**  
-7. **Deprecate demo data paths**
+## 12.1 Rollout
+1. Deploy migrations.
+2. Deploy backend services/RPC callers.
+3. Enable admin UI.
+4. Enable dealer UI enhancements.
+5. Monitor allocation success rate + error rate for 24h.
+
+## 12.2 Rollback
+- Keep v2 RPCs available during transition.
+- Feature flag to revert purchase/allocation calls to v2.
+- Migration rollback scripts for additive columns/tables only where safe.
 
 ---
 
-## 8) Done Criteria
+## 13) Definition of Done (DoD)
 
-- [ ] No business logic in components or route handlers.
-- [ ] All lead flows work end-to-end with DB + RLS.
-- [ ] Dealer unlock flow enforces entitlement and logs unlock event.
-- [ ] All critical API routes have Zod validation + rate limiting.
-- [ ] Home/listing/dealer screens reflect lead-first product narrative.
-- [ ] Build passes: `check-types`, `lint`, `build`.
+- End-to-end purchase → auto-allocation works in production-like environment.
+- No hardcoded pricing in app layer.
+- Dealer cannot purchase for another dealer identity.
+- Allocation idempotency and quota integrity verified under concurrency.
+- Admin can fully control pricing model without code deploy.
+- Audit trail exists for pricing changes and allocations.
+- `npm run build` and `npm run check-types` pass.
+
+---
+
+## 14) Open items for final sign-off
+
+1. Confirm default `allocation_mode = broadcast`.
+2. Confirm initial `max_dealers_per_lead` value (recommended: `3`).
+3. Confirm whether enterprise plans can bypass cap.
+
