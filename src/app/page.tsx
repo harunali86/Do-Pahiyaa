@@ -26,7 +26,9 @@ export default async function Home() {
         // Map Mock -> Real expected fields for VerifiedListingCard
         make: l.make || l.brand || "Yamaha",
         kms_driven: l.kms_driven ?? l.kms ?? 0,
+        images: Array.isArray(l.images) ? l.images : (l.imageUrl ? [l.imageUrl] : []),
       }));
+
 
 
 
