@@ -1,5 +1,4 @@
 export const dynamic = "force-dynamic";
-export const dynamic = "force-dynamic";
 
 import { LeadService } from "@/lib/services/lead.service";
 import { AdminLeadsTable } from "@/components/admin/leads/AdminLeadsTable";
