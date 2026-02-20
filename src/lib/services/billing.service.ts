@@ -1,17 +1,24 @@
 import Razorpay from "razorpay";
 import crypto from "crypto";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { env } from "@/lib/env";
 
-const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID!,
-    key_secret: process.env.RAZORPAY_KEY_SECRET!,
-});
+const razorpay = env.RAZORPAY_KEY_ID && env.RAZORPAY_KEY_SECRET
+    ? new Razorpay({
+        key_id: env.RAZORPAY_KEY_ID,
+        key_secret: env.RAZORPAY_KEY_SECRET,
+    })
+    : null;
 
 export class BillingService {
     /**
      * Create a Razorpay Order for credits purchase.
      */
     static async createCreditsOrder(dealerId: string, credits: number, amount: number) {
+        if (!razorpay) {
+            console.error("Razorpay is not configured.");
+            throw new Error("Payment system is currently unavailable (Demo Mode).");
+        }
         // 1. Create Order with Razorpay
         const options = {
             amount: amount * 100, // amount in paise

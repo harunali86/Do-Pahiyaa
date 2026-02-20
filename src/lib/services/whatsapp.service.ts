@@ -1,4 +1,4 @@
-import { ConfigService } from "./config.service";
+import { env } from "@/lib/env";
 
 /**
  * Service to handle WhatsApp Cloud API integration.
@@ -11,8 +11,8 @@ export class WhatsAppService {
      * Send a template message to a user.
      */
     static async sendTemplate(to: string, templateName: string, components: any[] = []) {
-        const token = process.env.WHATSAPP_ACCESS_TOKEN;
-        const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+        const token = env.WHATSAPP_ACCESS_TOKEN;
+        const phoneId = env.WHATSAPP_PHONE_NUMBER_ID;
 
         if (!token || !phoneId) {
             console.warn("WhatsApp credentials missing. Skipping notification.");
