@@ -20,7 +20,7 @@ const envSchema = z.object({
   APP_BASE_URL: z.string().url().default("http://localhost:3000")
 });
 
-export const env = envSchema.parse({
+const rawEnv = {
   NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || undefined,
   NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || undefined,
   NEXT_PUBLIC_RAZORPAY_KEY_ID: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || undefined,
@@ -32,5 +32,15 @@ export const env = envSchema.parse({
   WHATSAPP_ACCESS_TOKEN: process.env.WHATSAPP_ACCESS_TOKEN || undefined,
   WHATSAPP_PHONE_NUMBER_ID: process.env.WHATSAPP_PHONE_NUMBER_ID || undefined,
   APP_BASE_URL: process.env.APP_BASE_URL || undefined
-});
+};
+
+// Use safeParse to prevent runtime crash on boot
+const parsed = envSchema.safeParse(rawEnv);
+
+if (!parsed.success) {
+  console.error("❌ Environment Validation Failed. Using fallbacks.", parsed.error.format());
+}
+
+export const env = parsed.success ? parsed.data : envSchema.parse({});
+
 

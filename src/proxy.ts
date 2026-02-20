@@ -2,6 +2,7 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { rateLimit } from "@/lib/rate-limit";
 import { isAdminRole, isDealerOrAdminRole } from "@/lib/auth/authorization";
+import { env } from "@/lib/env";
 
 export async function proxy(request: NextRequest) {
     let response = NextResponse.next({
@@ -12,8 +13,9 @@ export async function proxy(request: NextRequest) {
 
     // 1. Supabase Session Setup
     const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        env.NEXT_PUBLIC_SUPABASE_URL,
+        env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+
         {
             cookies: {
                 getAll() {
