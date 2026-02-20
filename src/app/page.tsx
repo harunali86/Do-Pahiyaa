@@ -18,12 +18,16 @@ export default async function Home() {
     const cookieStore = await cookies();
     const selectedCity = cookieStore.get("user_city")?.value || "All India";
 
-    // Normalize Supabase FK joins (arrays → single objects)
+    // Normalize Supabase FK joins & Mock Data Schema
     const normalizeListings = (items: any[]) =>
       items.map((l: any) => ({
         ...l,
         seller: Array.isArray(l.seller) ? l.seller[0] ?? null : l.seller,
+        // Map Mock -> Real expected fields for VerifiedListingCard
+        make: l.make || l.brand || "Yamaha",
+        kms_driven: l.kms_driven ?? l.kms ?? 0,
       }));
+
 
 
     // PRESERVE MOCK DATA FOR DEMO (Requested by User)

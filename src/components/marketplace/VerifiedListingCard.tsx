@@ -85,8 +85,9 @@ export default function VerifiedListingCard({ listing }: VerifiedListingCardProp
                     </div>
                     <div className="flex items-center gap-1.5">
                         <Gauge className="h-3.5 w-3.5 text-slate-500" />
-                        <span>{listing.kms_driven.toLocaleString()} km</span>
+                        <span>{(listing.kms_driven || 0).toLocaleString()} km</span>
                     </div>
+
                     <div className="flex items-center gap-1.5 col-span-2">
                         <MapPin className="h-3.5 w-3.5 text-slate-500" />
                         <span className="truncate">{listing.city}</span>
