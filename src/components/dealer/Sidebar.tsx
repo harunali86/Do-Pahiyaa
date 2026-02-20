@@ -16,6 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { createBrowserClient } from "@supabase/ssr";
+import { env } from "@/lib/env";
 
 const dealerLinks: Array<{ name: string; href: string; icon: typeof LayoutDashboard }> = [
     { name: "Overview", href: "/dealer/dashboard", icon: LayoutDashboard },
@@ -30,8 +31,8 @@ export default function DealerSidebar() {
 
     const [balance, setBalance] = useState<number | null>(null);
     const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        env.NEXT_PUBLIC_SUPABASE_URL,
+        env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     );
 
     useEffect(() => {
