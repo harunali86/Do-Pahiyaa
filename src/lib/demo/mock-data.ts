@@ -184,54 +184,7 @@ export const demoListings: DemoListing[] = [
   }
 ];
 
-export type DealerLead = {
-  id: string;
-  listingTitle: string;
-  buyerName: string;
-  city: string;
-  offeredPrice: number;
-  status: "new" | "contacted" | "negotiating" | "closed";
-  createdAt: string;
-};
 
-export const dealerLeads: DealerLead[] = [
-  {
-    id: "lead-001",
-    listingTitle: "Royal Enfield Classic 350",
-    buyerName: "Aditya Sharma",
-    city: "Delhi",
-    offeredPrice: 168000,
-    status: "new",
-    createdAt: "2m ago"
-  },
-  {
-    id: "lead-002",
-    listingTitle: "Honda CB350 RS",
-    buyerName: "Rhea Nair",
-    city: "Chennai",
-    offeredPrice: 186500,
-    status: "contacted",
-    createdAt: "1h ago"
-  },
-  {
-    id: "lead-003",
-    listingTitle: "KTM Duke 250",
-    buyerName: "Rahul Jain",
-    city: "Pune",
-    offeredPrice: 178000,
-    status: "negotiating",
-    createdAt: "3h ago"
-  },
-  {
-    id: "lead-004",
-    listingTitle: "Royal Enfield Classic 350",
-    buyerName: "Karan Patel",
-    city: "Noida",
-    offeredPrice: 171500,
-    status: "closed",
-    createdAt: "1d ago"
-  }
-];
 
 export type DemoAuction = {
   id: string;

@@ -10,9 +10,18 @@ import {
     User
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
 
 export default function MobileNav() {
     const pathname = usePathname();
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true); // eslint-disable-line
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    if (!isMounted) return null;
 
     // Hide on admin/dealer routes to avoid clutter
     if (pathname?.startsWith("/admin") || pathname?.startsWith("/dealer")) {

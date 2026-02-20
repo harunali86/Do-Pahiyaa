@@ -1,9 +1,22 @@
+"use client";
+
 import { ArrowRight, Search } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { defaultBlurDataURL, imageQuality, imageSizes } from "@/lib/image";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function Hero() {
+    const router = useRouter();
+    const [query, setQuery] = useState("");
+
+    const handleSearch = () => {
+        if (query.trim()) {
+            router.push(`/search?query=${encodeURIComponent(query.trim())}`);
+        }
+    };
+
     return (
         <div className="group relative min-h-[620px] w-full overflow-hidden rounded-2xl mx-auto premium-ring bg-mesh">
             {/* Background Image with Overlay */}
@@ -13,6 +26,7 @@ export default function Hero() {
                     alt="Premium bikes showcase"
                     fill
                     priority
+                    unoptimized // Bypass server-side optimization to prevent timeouts in test
                     placeholder="blur"
                     blurDataURL={defaultBlurDataURL}
                     sizes={imageSizes.hero}
@@ -82,8 +96,14 @@ export default function Hero() {
                             type="text"
                             placeholder="Search by brand, model, or keywords..."
                             className="bg-transparent border-none text-white placeholder:text-slate-400 focus:outline-none flex-1 py-2 px-2"
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                         />
-                        <button className="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <button
+                            onClick={handleSearch}
+                            className="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                        >
                             Search
                         </button>
                     </div>

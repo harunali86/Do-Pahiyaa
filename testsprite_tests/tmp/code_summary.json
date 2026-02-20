@@ -1,0 +1,69 @@
+{
+    "tech_stack": [
+        "TypeScript",
+        "Next.js",
+        "Supabase",
+        "Tailwind CSS",
+        "Shadcn UI",
+        "Razorpay"
+    ],
+    "features": [
+        {
+            "name": "Authentication",
+            "description": "User signup and login with role selection (Buyer/Dealer) using Supabase Auth.",
+            "files": [
+                "src/app/auth/login/page.tsx",
+                "src/app/auth/signup/page.tsx",
+                "src/middleware.ts",
+                "src/lib/services/auth.service.ts"
+            ]
+        },
+        {
+            "name": "Marketplace Listings",
+            "description": "View, search, and filter bike listings. Supports city-wise filtering and sorting.",
+            "files": [
+                "src/app/page.tsx",
+                "src/app/search/page.tsx",
+                "src/app/listings/[id]/page.tsx",
+                "src/components/marketplace/ListingCard.tsx",
+                "src/lib/services/listing.service.ts"
+            ]
+        },
+        {
+            "name": "Dealer Dashboard",
+            "description": "Dashboard for dealers to manage inventory, view leads, and check subscription status.",
+            "files": [
+                "src/app/dealer/dashboard/page.tsx",
+                "src/components/dealer/DealerStats.tsx",
+                "src/components/dealer/RecentLeads.tsx",
+                "src/lib/services/dealer.service.ts"
+            ]
+        },
+        {
+            "name": "Lead Management",
+            "description": "System for buyers to inquire and dealers to unlock leads using credits.",
+            "files": [
+                "src/app/api/leads/unlock/route.ts",
+                "src/components/dealer/RealtimeLeadsList.tsx",
+                "src/lib/services/lead.service.ts"
+            ]
+        },
+        {
+            "name": "Listing Creation",
+            "description": "Form for dealers/sellers to post new bike listings with details and images.",
+            "files": [
+                "src/app/seller/listings/new/page.tsx",
+                "src/components/seller/ListingForm.tsx"
+            ]
+        },
+        {
+            "name": "Billing & Credits",
+            "description": "Razorpay integration for purchasing lead credits.",
+            "files": [
+                "src/app/api/billing/order/route.ts",
+                "src/components/dealer/BuyCreditsModal.tsx",
+                "src/lib/services/billing.service.ts"
+            ]
+        }
+    ]
+}

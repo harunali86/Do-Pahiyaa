@@ -12,7 +12,7 @@ Build an industry-grade hybrid bike marketplace platform with:
 1. B2C public marketplace (individual buyers/sellers)
 2. B2B dealer channel (inventory + lead pipeline)
 3. Realtime dealer auction system
-4. Hybrid negotiation model (lead unlock + booking token + commission)
+4. Lead Management model (lead unlock via credits/payment)
 5. Admin and super-admin control center
 
 ## 3) Current Repository State
@@ -45,7 +45,6 @@ Initial Next.js scaffold is already present with base config and starter structu
 - Save/watch listings
 - Place offers and counter flow participation
 - Track own deals
-- Pay booking token
 
 ### Seller
 
@@ -101,10 +100,10 @@ Initial Next.js scaffold is already present with base config and starter structu
 
 ### Hybrid Model
 
-- Lead unlock payment
+- Lead unlock payment (reveal phone/contact)
 - Contact reveal only after successful unlock
-- Booking token payment flow
-- Commission calculation and tracking
+- Lead status tracking (New, Contacted, Closed)
+- Lead-to-Sale conversion analytics
 - Enforced deal lifecycle states
 
 ### Dealer Channel
@@ -163,6 +162,7 @@ Must implement (with strong FK relationships, indexes, RLS):
 - `bids`
 - `notifications`
 - `audit_logs`
+- `unlock_events`
 
 Recommended supporting tables:
 
@@ -195,8 +195,7 @@ Recommended supporting tables:
 
 ### Hybrid Payments
 
-- `POST /api/deals/:id/unlock-lead/order`
-- `POST /api/deals/:id/booking-token/order`
+- `POST /api/leads/:id/unlock/order`
 - `POST /api/payments/razorpay/webhook`
 
 ### Dealer
@@ -305,4 +304,3 @@ Required runtime env keys:
 3. Keep architecture compatible with Supabase-backed production rollout.
 4. After frontend demo, implement DB migrations and API modules incrementally.
 5. Preserve strict typing, modular structure, and security-first conventions.
-

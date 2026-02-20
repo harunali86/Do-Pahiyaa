@@ -1,6 +1,7 @@
 "use client";
 
-import { Camera, CheckCircle2, AlertCircle } from "lucide-react";
+import Link from "next/link";
+import { Camera, CheckCircle2 } from "lucide-react";
 
 export default function SellPage() {
     return (
@@ -36,13 +37,12 @@ export default function SellPage() {
             </div>
 
             <div className="mt-12 flex flex-col items-center gap-4">
-                <button className="px-8 py-4 rounded-xl bg-brand-600 font-bold text-white text-lg shadow-xl shadow-brand-500/20 hover:bg-brand-500 transition-all active:scale-95">
+                <Link
+                    href="/seller/listings/new"
+                    className="px-8 py-4 rounded-xl bg-brand-600 font-bold text-white text-lg shadow-xl shadow-brand-500/20 hover:bg-brand-500 transition-all active:scale-95 inline-block"
+                >
                     Start Listing Flow
-                </button>
-                <div className="flex items-center gap-2 text-accent-gold text-sm bg-accent-gold/10 px-4 py-2 rounded-full border border-accent-gold/20">
-                    <AlertCircle className="h-4 w-4" />
-                    Demo Mode: Form submission is disabled.
-                </div>
+                </Link>
             </div>
         </div>
     );

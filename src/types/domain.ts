@@ -1,4 +1,4 @@
-export type UserRole = "buyer" | "seller" | "dealer" | "admin" | "super_admin";
+export type UserRole = "user" | "dealer" | "admin" | "super_admin";
 
 export type UserStatus = "pending" | "active" | "blocked";
 
@@ -17,21 +17,15 @@ export type OfferStatus =
 export type DealState =
   | "lead_created"
   | "lead_unlocked"
-  | "token_paid"
-  | "inspection"
-  | "negotiated"
-  | "agreed"
-  | "completed"
-  | "cancelled"
-  | "disputed"
-  | "refunded";
+  | "contacted"
+  | "converted"
+  | "closed"
+  | "cancelled";
 
 export type PaymentType =
   | "lead_unlock"
-  | "booking_token"
   | "subscription"
-  | "auction_fee"
-  | "commission";
+  | "auction_fee";
 
 export type PaymentStatus =
   | "created"

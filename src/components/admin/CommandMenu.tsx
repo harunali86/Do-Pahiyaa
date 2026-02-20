@@ -9,7 +9,8 @@ import {
     Search,
     LayoutDashboard,
     ShieldAlert,
-    Package
+    Package,
+    SlidersHorizontal
 } from "lucide-react";
 
 export function CommandMenu() {
@@ -74,6 +75,13 @@ export function CommandMenu() {
                     >
                         <Package className="mr-2 h-4 w-4" />
                         <span>Inventory</span>
+                    </Command.Item>
+                    <Command.Item
+                        onSelect={() => runCommand(() => router.push("/admin/pricing" as Route))}
+                        className="flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none text-slate-300 aria-selected:bg-brand-500/10 aria-selected:text-white data-[disabled]:pointer-events-none data-[disabled]:opacity-50 mb-1"
+                    >
+                        <SlidersHorizontal className="mr-2 h-4 w-4" />
+                        <span>Pricing Engine</span>
                     </Command.Item>
                 </Command.Group>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Mail, MapPin, Phone, Send } from "lucide-react";
+import { Mail, MapPin, Phone, Send, Facebook, Instagram } from "lucide-react";
 
 export default function ContactPage() {
     return (
@@ -39,6 +39,21 @@ export default function ContactPage() {
                             <h3 className="font-bold text-white">Visit us</h3>
                             <p className="text-slate-400 text-sm">Indiranagar, Bengaluru, KA</p>
                         </div>
+                    </div>
+                </div>
+
+                <div className="mt-12 pt-12 border-t border-white/5">
+                    <h3 className="text-white font-bold mb-6">Follow us</h3>
+                    <div className="flex gap-4">
+                        <a href="https://www.facebook.com/share/1FHuRrzBBK/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-slate-400 hover:text-brand-500 transition-all">
+                            <Facebook className="w-5 h-5" />
+                        </a>
+                        <a href="https://www.instagram.com/dopahiyaa?utm_source=qr&igsh=cDk3NHR4dDd2Nm1m" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-slate-400 hover:text-brand-500 transition-all">
+                            <Instagram className="w-5 h-5" />
+                        </a>
+                        <a href="https://www.google.com/search?q=road+buddy+reviews&si=AL3DRZEsmMGCryMMFSHJ3StBhOdZ2-6yYkXd_doETEE1OR-qOY0qKlWDHg_DHGrYoUOx79BQ5w5snG1yQXGvoViKTcCqh6RNq5EsgDhLf9wb8QPk2P9iJ8EMOdv-Z1jiCkVrImAXDqEW" target="_blank" rel="noopener noreferrer" className="px-5 h-10 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-sm font-bold text-slate-400 hover:text-brand-500 transition-all">
+                            Google Reviews
+                        </a>
                     </div>
                 </div>
             </div>

@@ -1,0 +1,1170 @@
+[
+  {
+    "id": "TC001",
+    "title": "Search listings from home page returns filtered results",
+    "description": "Verifies a user can search from the home page and see results filtered by keyword.",
+    "category": "Marketplace Listings",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"ListingCards list\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Search\" input field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Ducati\" into the \"Search\" input field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Search\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Ducati\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "City filter + Newest sort on search page updates visible results",
+    "description": "Verifies a user can filter by city and sort by Newest on the search page and see updated results.",
+    "category": "Marketplace Listings",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /search"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"City filter control\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"City\" filter control"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Bengaluru\" from the \"City\" dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Sort\" control"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Newest\" from the \"Sort\" dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Bengaluru\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "Open listing details from a ListingCard on home page",
+    "description": "Verifies a user can open a listing detail page by clicking a listing card and see key listing details.",
+    "category": "Marketplace Listings",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"ListingCards list\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on the first \"ListingCard\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/listings/\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Listing title\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Listing images\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "No-results search shows empty state message on search page",
+    "description": "Verifies an empty state is shown when a query returns no listings.",
+    "category": "Marketplace Listings",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /search"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Search\" input field is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Search\" input field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"zzzz-no-such-bike-12345\" into the \"Search\" input field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Search\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"No Results\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "Incompatible filters show zero results count and a broaden-filters prompt",
+    "description": "Verifies the UI indicates zero results when filters conflict and provides guidance to broaden filters.",
+    "category": "Marketplace Listings",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"City filter control\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"City\" filter control"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Mumbai\" from the \"City\" dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Additional filters\" control"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Electric\" from the \"Fuel type\" dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"0\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Broaden\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "Search results can be cleared to return to broader listing set",
+    "description": "Verifies a user can clear a search query and see the listing set broaden again.",
+    "category": "Marketplace Listings",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /search"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Search\" input field is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Search\" input field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Honda\" into the \"Search\" input field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Search\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Honda\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Clear\" control for the search input"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"ListingCards list\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "Switching sort order changes the ordering indicator on the search page",
+    "description": "Verifies a user can change sorting and the selected sort option is reflected in the UI.",
+    "category": "Marketplace Listings",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /search"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Sort\" control is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Sort\" control"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Price: Low to High\" from the \"Sort\" dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Price: Low to High\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Sort\" control"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Newest\" from the \"Sort\" dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Newest\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "Listing detail page shows lead capture option on a listing",
+    "description": "Verifies that the listing detail page presents a visible lead capture call-to-action.",
+    "category": "Marketplace Listings",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"ListingCards list\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on the first \"ListingCard\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/listings/\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Lead capture\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Contact\" or \"Send Enquiry\" button is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "Dealer can log in and see dashboard stats (revenue and credit balance)",
+    "description": "Verifies a dealer can access the dashboard after login and see key stats including revenue and credit balance.",
+    "category": "Dealer Dashboard",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /auth/login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Log in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dealer/dashboard\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"DealerStats\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Revenue\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Credits\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "Dealer can open a recent lead and view lead metadata",
+    "description": "Verifies that clicking a lead in the Recent Leads list opens lead detail and shows lead metadata.",
+    "category": "Dealer Dashboard",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /auth/login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Log in\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click a lead item in the \"Recent Leads\" list"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Lead details\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Lead\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Created\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "Dealer dashboard shows Recent Leads list on initial load",
+    "description": "Verifies that the Recent Leads section renders and shows at least the list container on the dashboard.",
+    "category": "Dealer Dashboard",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /auth/login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Log in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dealer/dashboard\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Recent Leads\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Recent Leads list\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "Dealer can select multiple listings and open Bulk Edit quick edit drawer",
+    "description": "Verifies multi-select on listings shows bulk action bar and Bulk Edit opens the quick edit drawer.",
+    "category": "Dealer Dashboard",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /auth/login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Log in\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click the selection checkbox for the first listing row"
+      },
+      {
+        "type": "action",
+        "description": "Click the selection checkbox for the second listing row"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Bulk action bar\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Bulk Edit\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Quick edit\" drawer is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC013",
+    "title": "Bulk action bar does not appear when no listings are selected",
+    "description": "Verifies that the bulk action UI remains hidden until at least one listing is selected.",
+    "category": "Dealer Dashboard",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /auth/login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Log in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dealer/dashboard\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Listings\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Bulk action bar\" is not visible"
+      }
+    ]
+  },
+  {
+    "id": "TC014",
+    "title": "Non-dealer user cannot access dealer dashboard (unauthorized)",
+    "description": "Verifies that a non-dealer account is blocked from the dealer dashboard and is redirected to login or shown an unauthorized state.",
+    "category": "Dealer Dashboard",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /auth/login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"nondealer_user@example.com\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"WrongPassword123!\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Log in\" button"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /dealer/dashboard"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/auth/login\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Unauthorized\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC015",
+    "title": "Unlock lead with insufficient credits shows Buy Credits modal instead of contact details",
+    "description": "Verifies that when credits are insufficient, attempting to unlock a lead prompts a Buy Credits modal and does not reveal contact details.",
+    "category": "Dealer Dashboard",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /auth/login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Log in\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click a lead item in the \"Recent Leads\" list"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Unlock lead\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Buy Credits\" modal is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Contact\" is not visible"
+      }
+    ]
+  },
+  {
+    "id": "TC016",
+    "title": "Dealer can attempt to unlock lead and see contact details when credits are available",
+    "description": "Verifies that unlocking a lead reveals contact details when the dealer has sufficient credits.",
+    "category": "Dealer Dashboard",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /auth/login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Log in\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click a lead item in the \"Recent Leads\" list"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Unlock lead\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Phone\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Email\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC017",
+    "title": "Buyer sends an inquiry from a listing detail page",
+    "description": "Verifies a buyer can submit an inquiry on a listing and sees an on-screen confirmation.",
+    "category": "Lead Management",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to a listing details page using a known-accessible listing URL from the application (a concrete listing detail page opened from within the app UI)."
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Inquire\" button."
+      },
+      {
+        "type": "action",
+        "description": "Type \"Hi, I’m interested in this bike. Please share availability and best price.\" into the inquiry message field."
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Send Inquiry\" button."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Inquiry sent\" is visible."
+      }
+    ]
+  },
+  {
+    "id": "TC018",
+    "title": "Buyer inquiry validation: prevent sending an empty inquiry message",
+    "description": "Verifies the inquiry form requires a message before it can be submitted.",
+    "category": "Lead Management",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to a listing details page using a known-accessible listing URL from the application (a concrete listing detail page opened from within the app UI)."
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Inquire\" button."
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Send Inquiry\" button."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Message is required\" is visible."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Inquiry sent\" is not visible."
+      }
+    ]
+  },
+  {
+    "id": "TC019",
+    "title": "Dealer unlocks a new lead and sees buyer contact details",
+    "description": "Verifies a dealer can unlock a newly received lead and view buyer contact details, and the UI updates to unlocked state.",
+    "category": "Lead Management",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login."
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field."
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field."
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Sign in\" button."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dealer\"."
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Dashboard\" in the dealer navigation (if not already on the dashboard)."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Realtime Leads\" is visible."
+      },
+      {
+        "type": "action",
+        "description": "Click on a lead shown as \"New\" or \"Locked\" in the realtime leads list."
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Unlock lead\" button."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Contact\" is visible."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a buyer phone number or email is visible in the lead details area."
+      }
+    ]
+  },
+  {
+    "id": "TC020",
+    "title": "Dealer unlock attempt with insufficient credits shows Buy Credits modal",
+    "description": "Verifies that when the dealer has insufficient credits, unlocking a lead prompts the Buy Credits modal instead of revealing contact details.",
+    "category": "Lead Management",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login."
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field."
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field."
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Sign in\" button."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dealer\"."
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Dashboard\" in the dealer navigation (if not already on the dashboard)."
+      },
+      {
+        "type": "action",
+        "description": "Click on a lead shown as \"Locked\" in the realtime leads list."
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Unlock lead\" button."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Buy Credits\" is visible."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Insufficient credits\" is visible."
+      }
+    ]
+  },
+  {
+    "id": "TC021",
+    "title": "Dealer cannot unlock a lead already claimed by another dealer",
+    "description": "Verifies the UI shows a \"Lead already claimed\" error and does not reveal contact details when a lead is already unlocked by another dealer.",
+    "category": "Lead Management",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login."
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field."
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field."
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Sign in\" button."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dealer\"."
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Dashboard\" in the dealer navigation (if not already on the dashboard)."
+      },
+      {
+        "type": "action",
+        "description": "Click on a lead shown as \"Locked\" in the realtime leads list that is known to be claimed by a different dealer."
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Unlock lead\" button."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Lead already claimed\" is visible."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Contact\" is not visible."
+      }
+    ]
+  },
+  {
+    "id": "TC022",
+    "title": "Dealer unlock action updates lead status to unlocked in the list",
+    "description": "Verifies the lead item in the realtime list visibly changes state after a successful unlock.",
+    "category": "Lead Management",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login."
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field."
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field."
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Sign in\" button."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dealer\"."
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Dashboard\" in the dealer navigation (if not already on the dashboard)."
+      },
+      {
+        "type": "action",
+        "description": "Click on a lead shown as \"Locked\" in the realtime leads list."
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Unlock lead\" button."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Unlocked\" is visible on the lead details view."
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Back to Leads\" or close the lead details panel (whichever is available) to return focus to the list."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the same lead now shows status text \"Unlocked\" (or no longer shows \"Locked\") in the realtime leads list."
+      }
+    ]
+  },
+  {
+    "id": "TC023",
+    "title": "Dealer cancels out of Buy Credits prompt and lead remains locked",
+    "description": "Verifies that dismissing the Buy Credits modal does not unlock the lead or reveal contact details.",
+    "category": "Lead Management",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login."
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field."
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field."
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Sign in\" button."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dealer\"."
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Dashboard\" in the dealer navigation (if not already on the dashboard)."
+      },
+      {
+        "type": "action",
+        "description": "Click on a lead shown as \"Locked\" in the realtime leads list."
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Unlock lead\" button."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Buy Credits\" is visible."
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Close\" button on the modal (or press Escape if a close button is not present)."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Buy Credits\" is not visible."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Contact\" is not visible."
+      }
+    ]
+  },
+  {
+    "id": "TC024",
+    "title": "Validation error when Title is missing",
+    "description": "Verifies inline validation prevents publish when the Title field is empty and shows an error message for the missing required field.",
+    "category": "Listing Creation",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /seller/listings/new"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/seller/listings/new\""
+      },
+      {
+        "type": "action",
+        "description": "Fill \"2450000\" into the Price field"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Bengaluru\" from the City dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Publish\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Title\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"required\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC025",
+    "title": "Validation error when Price is missing",
+    "description": "Verifies inline validation prevents publish when the Price field is empty and shows an error message for the missing required field.",
+    "category": "Listing Creation",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /seller/listings/new"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/seller/listings/new\""
+      },
+      {
+        "type": "action",
+        "description": "Fill \"2019 Ducati Panigale V4\" into the Title field"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Bengaluru\" from the City dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Publish\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Price\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"required\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC026",
+    "title": "Validation error when City is not selected",
+    "description": "Verifies the user cannot publish without selecting a city and sees an inline validation message.",
+    "category": "Listing Creation",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /seller/listings/new"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/seller/listings/new\""
+      },
+      {
+        "type": "action",
+        "description": "Fill \"2019 Ducati Panigale V4\" into the Title field"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"2450000\" into the Price field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Publish\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"City\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"required\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC027",
+    "title": "Publish button remains blocked when a required field is cleared after being filled",
+    "description": "Verifies required field validation still applies if a user fills a required field and then clears it before publishing.",
+    "category": "Listing Creation",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /seller/listings/new"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/seller/listings/new\""
+      },
+      {
+        "type": "action",
+        "description": "Fill \"2019 Ducati Panigale V4\" into the Title field"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"\" into the Title field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Publish\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Title\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"required\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC028",
+    "title": "Buy Credits modal can be closed without purchasing",
+    "description": "Verifies the dealer can dismiss the Buy Credits modal without initiating a purchase and return to the dashboard state.",
+    "category": "Billing & Credits",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dealer/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Buy Credits\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Close\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Buy Credits\" is visible"
+      }
+    ]
+  }
+]

@@ -13,7 +13,7 @@ The platform follows a **Serverless, Event-Driven Architecture** optimized for s
   - **Realtime**: Supabase Realtime (WebSockets) for auctions and notifications.
 - **Edge Layer**: Cloudflare (caching, WAF, DNS).
 - **Hosting**: Vercel (Edge Functions, static serving).
-- **Payments**: Razorpay (Lead unlock, Token payment).
+- **Payments**: Razorpay (Lead unlock, Subscription).
 
 ## 2. Database Schema
 
@@ -24,7 +24,7 @@ The database uses a relational model with strong foreign key constraints.
 - **`listings`**: `id` (PK), `seller_id` (FK), `title`, `price`, `specs` (JSONB), `status`, `location`.
 - **`listing_images`**: `id`, `listing_id` (FK), `url`, `order`.
 - **`offers`**: `id`, `listing_id` (FK), `buyer_id` (FK), `amount`, `status` (pending/accepted/rejected).
-- **`deals`**: `id`, `listing_id` (FK), `seller_id`, `buyer_id`, `status` (lead_unlocked/token_paid/completed), `commission_amount`.
+- **`deals`**: `id`, `listing_id` (FK), `seller_id`, `buyer_id`, `status` (lead_unlocked/completed).
 - **`auctions`**: `id`, `listing_id` (FK), `start_time`, `end_time`, `start_price`, `reserve_price`, `status`, `current_bid`.
 - **`bids`**: `id`, `auction_id` (FK), `bidder_id` (FK), `amount`, `timestamp`.
 - **`notifications`**: `id`, `user_id` (FK), `type`, `payload` (JSONB), `read_at`.
@@ -37,7 +37,7 @@ We use Next.js Route Handlers (`app/api/...`) for specific transactional logic, 
 ### Key Endpoints (REST)
 - `POST /api/listings`: Create new listing (with server-side validation).
 - `POST /api/offers`: Submit an offer.
-- `POST /api/deals/{id}/unlock`: Process Razorpay payment for lead unlock.
+- `POST /api/leads/{id}/unlock`: Process Razorpay payment for lead unlock.
 - `POST /api/auctions/{id}/bid`: Place a bid (Transactional, heavy validation).
 - `GET /api/admin/stats`: Aggregated analytics for admin dashboard.
 

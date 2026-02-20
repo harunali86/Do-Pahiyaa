@@ -13,7 +13,9 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "images.unsplash.com"
       }
-    ]
+    ],
+    unoptimized: true,
+    qualities: [70, 75, 80],
   }
 };
 

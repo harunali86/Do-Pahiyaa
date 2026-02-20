@@ -1,0 +1,18 @@
+[
+    {
+        "missing": "Add Funds Page",
+        "description": "Dealer currently sees 'Add Funds' button but it leads nowhere.",
+        "requirement": "Create /dealer/credits page with Razorpay integration.",
+        "rules": "Min 100 leads purchase, +18% GST calculation."
+    },
+    {
+        "missing": "Invoice Generation",
+        "description": "After payment, dealer needs a GST invoice.",
+        "requirement": "Auto-generate PDF invoice or simple receipt view."
+    },
+    {
+        "missing": "Transaction History",
+        "description": "Dealer needs to see pas purchases.",
+        "requirement": "Add 'Transaction History' tab to Credits page."
+    }
+]

@@ -2,31 +2,86 @@
 
 import Link from "next/link";
 import type { Route } from "next";
-import { useState } from "react";
-import { Menu, X, Bell, User } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Menu, X, User, LogOut, LayoutDashboard, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CitySelector } from "./CitySelector";
+import ConfirmationDialog from "@/components/ui/confirmation-dialog";
+import { NotificationBell } from "./NotificationBell";
+import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { useRouter } from "next/navigation";
+import { getUserRoleAction } from "@/app/actions/auth";
+
+type UserRole = "user" | "dealer" | "admin" | null;
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
-    const [activeRole, setActiveRole] = useState<"buyer" | "dealer" | "admin">("buyer");
+    const [user, setUser] = useState<any>(null);
+    const [userRole, setUserRole] = useState<UserRole>(null);
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+    const router = useRouter();
+    const supabase = createSupabaseBrowserClient();
+    const roleFetchedRef = useRef(false);
 
-    const navLinks: Array<{
-        name: string;
-        href: string;
-        role: "buyer" | "dealer" | "admin";
-    }> = [
-            { name: "Marketplace", href: "/", role: "buyer" },
-            { name: "Sell Bike", href: "/sell", role: "buyer" },
-            { name: "Auctions", href: "/auctions", role: "buyer" },
-            { name: "Dealer Dashboard", href: "/dealer/dashboard", role: "dealer" },
-            { name: "Inventory", href: "/dealer/inventory", role: "dealer" },
-            { name: "Live Leads", href: "/dealer/leads", role: "dealer" },
-            { name: "Admin Panel", href: "/admin", role: "admin" }
-        ];
+    useEffect(() => {
+        const getUser = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            setUser(session?.user ?? null);
 
-    const filteredLinks = navLinks.filter(
-        (link) => link.role === activeRole || link.role === "buyer"
-    );
+            // Fetch user role from profiles table (via Server Action)
+            if (session?.user && !roleFetchedRef.current) {
+                roleFetchedRef.current = true;
+                const role = await getUserRoleAction();
+                setUserRole(role);
+            }
+        };
+        getUser();
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user ?? null);
+            if (!session?.user) {
+                setUserRole(null);
+                roleFetchedRef.current = false;
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, []);
+
+    const handleLogoutClick = () => {
+        setShowLogoutConfirm(true);
+    };
+
+    const confirmLogout = async () => {
+        await supabase.auth.signOut();
+        router.refresh();
+        setUser(null);
+        setUserRole(null);
+        roleFetchedRef.current = false;
+        setShowLogoutConfirm(false);
+        setIsOpen(false);
+    };
+
+    // Public links (always visible)
+    const publicLinks = [
+        { name: "Marketplace", href: "/" },
+        { name: "Sell Bike", href: "/sell" },
+        { name: "Dealer Panel", href: "/dealer/dashboard" }, // Temporary: Show to everyone
+        { name: "Admin Panel", href: "/admin" }, // Temporary: Show to everyone
+    ];
+
+    // Role-specific dashboard link (Keep this for highlighting, but links are now public in menu)
+    const getRoleDashboardLink = () => {
+        if (userRole === "admin") {
+            return { name: "Admin (Role Active)", href: "/admin", icon: ShieldCheck, color: "text-red-400" };
+        }
+        if (userRole === "dealer") {
+            return { name: "Dealer (Role Active)", href: "/dealer/dashboard", icon: LayoutDashboard, color: "text-brand-400" };
+        }
+        return null;
+    };
+
+    const dashboardLink = user ? getRoleDashboardLink() : null;
 
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
@@ -41,8 +96,9 @@ export default function Navbar() {
                     </div>
 
                     {/* Desktop Nav */}
-                    <div className="hidden md:flex items-center space-x-8">
-                        {filteredLinks.map((link) => (
+                    <div className="hidden md:flex items-center space-x-6">
+                        <CitySelector />
+                        {publicLinks.map((link) => (
                             <Link
                                 key={link.name}
                                 href={link.href as Route}
@@ -51,35 +107,26 @@ export default function Navbar() {
                                 {link.name}
                             </Link>
                         ))}
+
+                        {/* Role-specific dashboard link */}
+                        {dashboardLink && (
+                            <Link
+                                href={dashboardLink.href as Route}
+                                className={cn(
+                                    "flex items-center gap-1.5 text-sm font-semibold transition-colors",
+                                    dashboardLink.color,
+                                    "hover:text-white"
+                                )}
+                            >
+                                <dashboardLink.icon className="h-4 w-4" />
+                                {dashboardLink.name}
+                            </Link>
+                        )}
                     </div>
 
                     {/* Right Actions */}
                     <div className="hidden md:flex items-center gap-4">
-                        {/* Role Switcher (Demo Only) */}
-                        <div className="hidden lg:flex bg-slate-800/50 rounded-full p-1 border border-white/5">
-                            {(["buyer", "dealer", "admin"] as const).map((role) => (
-                                <button
-                                    key={role}
-                                    onClick={() => setActiveRole(role)}
-                                    className={cn(
-                                        "px-3 py-1 text-xs font-medium rounded-full transition-all capitalize",
-                                        activeRole === role
-                                            ? "bg-brand-600 text-white shadow-lg"
-                                            : "text-slate-400 hover:text-white"
-                                    )}
-                                >
-                                    {role}
-                                </button>
-                            ))}
-                        </div>
-
-                        <button
-                            aria-label="Open notifications"
-                            className="p-2 text-slate-300 hover:text-white transition-colors relative"
-                        >
-                            <Bell className="h-5 w-5" />
-                            <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-accent-gold ring-2 ring-slate-900" />
-                        </button>
+                        <NotificationBell />
 
                         <Link
                             href="/sell"
@@ -88,13 +135,32 @@ export default function Navbar() {
                             Post Bike
                         </Link>
 
-                        <Link
-                            href="/auth/login"
-                            className="flex items-center gap-2 rounded-full bg-white/5 px-3 py-1.5 text-sm font-medium text-white hover:bg-white/10 transition-colors border border-white/5"
-                        >
-                            <User className="h-4 w-4" />
-                            <span>Login</span>
-                        </Link>
+                        {user ? (
+                            <div className="flex items-center gap-2">
+                                <Link
+                                    href="/settings/profile"
+                                    className="flex items-center gap-2 rounded-full bg-white/5 px-3 py-1.5 text-sm font-medium text-white hover:bg-white/10 transition-colors border border-white/5"
+                                >
+                                    <User className="h-4 w-4" />
+                                    <span>{user.user_metadata?.full_name?.split(' ')[0] || 'Account'}</span>
+                                </Link>
+                                <button
+                                    onClick={handleLogoutClick}
+                                    className="p-2 text-slate-400 hover:text-white transition-colors"
+                                    title="Logout"
+                                >
+                                    <LogOut className="h-5 w-5" />
+                                </button>
+                            </div>
+                        ) : (
+                            <Link
+                                href="/auth/login"
+                                className="flex items-center gap-2 rounded-full bg-white/5 px-3 py-1.5 text-sm font-medium text-white hover:bg-white/10 transition-colors border border-white/5"
+                            >
+                                <User className="h-4 w-4" />
+                                <span>Login</span>
+                            </Link>
+                        )}
                     </div>
 
                     {/* Mobile Menu Button */}
@@ -114,25 +180,7 @@ export default function Navbar() {
             {isOpen && (
                 <div className="md:hidden absolute top-24 left-4 right-4 z-40">
                     <div className="glass-panel p-4 space-y-2">
-                        {/* Mobile Role Switcher */}
-                        <div className="flex justify-center bg-slate-800/50 rounded-lg p-1 mb-4 border border-white/5">
-                            {(["buyer", "dealer", "admin"] as const).map((role) => (
-                                <button
-                                    key={role}
-                                    onClick={() => setActiveRole(role)}
-                                    className={cn(
-                                        "flex-1 py-1.5 text-xs font-medium rounded-md transition-all capitalize",
-                                        activeRole === role
-                                            ? "bg-brand-600 text-white shadow-lg"
-                                            : "text-slate-400 hover:text-white"
-                                    )}
-                                >
-                                    {role}
-                                </button>
-                            ))}
-                        </div>
-
-                        {filteredLinks.map((link) => (
+                        {publicLinks.map((link) => (
                             <Link
                                 key={link.name}
                                 href={link.href as Route}
@@ -142,6 +190,23 @@ export default function Navbar() {
                                 {link.name}
                             </Link>
                         ))}
+
+                        {/* Role-specific dashboard link (mobile) */}
+                        {dashboardLink && (
+                            <Link
+                                href={dashboardLink.href as Route}
+                                className={cn(
+                                    "flex items-center gap-2 px-3 py-2 rounded-md text-base font-semibold transition-colors",
+                                    dashboardLink.color,
+                                    "hover:bg-white/5"
+                                )}
+                                onClick={() => setIsOpen(false)}
+                            >
+                                <dashboardLink.icon className="h-4 w-4" />
+                                {dashboardLink.name}
+                            </Link>
+                        )}
+
                         <div className="pt-4 border-t border-white/10">
                             <Link
                                 href="/sell"
@@ -150,17 +215,53 @@ export default function Navbar() {
                             >
                                 Post Bike
                             </Link>
-                            <Link
-                                href="/auth/login"
-                                className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-3 py-2 text-sm font-medium text-white hover:bg-brand-500 transition-colors shadow-lg shadow-brand-500/20"
-                            >
-                                <User className="h-4 w-4" />
-                                <span>Login / Register</span>
-                            </Link>
+
+                            {user ? (
+                                <>
+                                    <Link
+                                        href="/settings/profile"
+                                        className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-800 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700 transition-colors mb-2"
+                                        onClick={() => setIsOpen(false)}
+                                    >
+                                        <User className="h-4 w-4" />
+                                        <span>Profile</span>
+                                    </Link>
+                                    <button
+                                        onClick={() => {
+                                            handleLogoutClick();
+                                            setIsOpen(false);
+                                        }}
+                                        className="flex w-full items-center justify-center gap-2 rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2 text-sm font-medium text-red-400 hover:bg-red-500/20 transition-colors"
+                                    >
+                                        <LogOut className="h-4 w-4" />
+                                        <span>Logout</span>
+                                    </button>
+                                </>
+                            ) : (
+                                <Link
+                                    href="/auth/login"
+                                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-3 py-2 text-sm font-medium text-white hover:bg-brand-500 transition-colors shadow-lg shadow-brand-500/20"
+                                    onClick={() => setIsOpen(false)}
+                                >
+                                    <User className="h-4 w-4" />
+                                    <span>Login / Register</span>
+                                </Link>
+                            )}
                         </div>
                     </div>
                 </div>
             )}
+
+            <ConfirmationDialog
+                isOpen={showLogoutConfirm}
+                onClose={() => setShowLogoutConfirm(false)}
+                onConfirm={confirmLogout}
+                title="Log Out"
+                description="Are you sure you want to log out of your account?"
+                confirmText="Log Out"
+                cancelText="Cancel"
+                variant="danger"
+            />
         </nav>
     );
 }

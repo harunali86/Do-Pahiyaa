@@ -1,59 +1,122 @@
 import Link from "next/link";
 import type { Route } from "next";
 import Image from "next/image";
-import { Heart, MapPin, Gauge, Calendar, Star } from "lucide-react";
+import { Heart, MapPin, Gauge, Calendar, Star, GitCompare } from "lucide-react";
+import { toast } from "sonner";
 import { DemoListing } from "@/lib/demo/mock-data";
 import { defaultBlurDataURL, imageQuality, imageSizes } from "@/lib/image";
 import { formatINR, cn } from "@/lib/utils";
 
+// Union type to support both Real DB and Demo fallback
+type CardListing = DemoListing | {
+    id: string;
+    title: string;
+    make: string;
+    model: string;
+    year: number;
+    price: number;
+    kms_driven?: number;
+    kms?: number;
+    city: string;
+    images?: string[] | null;
+    imageUrl?: string;
+    status: string;
+    is_company_listing?: boolean;
+    condition?: string;
+    postedBy?: string;
+    rating?: number;
+    ownerType?: string;
+};
+
 interface ListingCardProps {
-    listing: DemoListing;
+    listing: CardListing;
 }
 
 export default function ListingCard({ listing }: ListingCardProps) {
+    // Shared Normalization with Type Guarding
+    const hasImages = 'images' in listing && listing.images && listing.images.length > 0;
+    const imageUrl = hasImages
+        ? (listing as any).images[0]
+        : ((listing as any).imageUrl || "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=800&q=80");
+
+    const kmsDisplay = ((listing as any).kms_driven ?? (listing as any).kms ?? 0).toLocaleString();
+    const condition = listing.condition || "Verified";
+    const rating = listing.rating ? listing.rating.toFixed(1) : "4.8";
+    const ownerType = listing.ownerType || ((listing as any).is_company_listing ? "Certified" : "Individual");
+    const postedByLabel = listing.postedBy === "Dealer" ? "Dealer" : "";
     return (
         <div className="group relative overflow-hidden rounded-2xl bg-slate-900/50 border border-white/5 hover:border-brand-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-brand-500/10">
             {/* Image Container */}
             <div className="relative aspect-[4/3] overflow-hidden">
                 {/* Badge */}
-                <div className="absolute top-3 left-3 z-10 flex gap-2">
-                    <span className={cn(
-                        "px-2.5 py-1 rounded-md text-xs font-semibold backdrop-blur-md border",
-                        listing.condition === "Excellent"
-                            ? "bg-green-500/20 border-green-500/30 text-green-300"
-                            : "bg-accent-gold/20 border-accent-gold/30 text-accent-gold"
-                    )}>
-                        {listing.condition}
+                <span className={cn(
+                    "px-2.5 py-1 rounded-md text-xs font-semibold backdrop-blur-md border",
+                    condition === "Excellent"
+                        ? "bg-green-500/20 border-green-500/30 text-green-300"
+                        : "bg-accent-gold/20 border-accent-gold/30 text-accent-gold"
+                )}>
+                    {condition}
+                </span>
+                {postedByLabel === "Dealer" && (
+                    <span className="px-2.5 py-1 rounded-md text-xs font-semibold bg-accent-gold/20 border border-accent-gold/30 text-accent-gold backdrop-blur-md">
+                        Dealer
                     </span>
-                    {listing.postedBy === "Dealer" && (
-                        <span className="px-2.5 py-1 rounded-md text-xs font-semibold bg-accent-gold/20 border border-accent-gold/30 text-accent-gold backdrop-blur-md">
-                            Dealer
-                        </span>
-                    )}
-                </div>
+                )}
+            </div>
 
-                {/* Favorite Button */}
+            {/* Favorite Button */}
+            {/* Action Buttons */}
+            <div className="absolute top-3 right-3 z-10 flex flex-col gap-2">
                 <button
                     aria-label={`Save ${listing.title} to favorites`}
-                    className="absolute top-3 right-3 z-10 p-2 rounded-full bg-black/20 hover:bg-black/40 text-white backdrop-blur-sm transition-colors opacity-0 group-hover:opacity-100"
+                    className="p-2 rounded-full bg-black/20 hover:bg-black/40 text-white backdrop-blur-sm transition-colors opacity-0 group-hover:opacity-100"
                 >
                     <Heart className="h-4 w-4" />
                 </button>
+                <button
+                    onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        // Add to LocalStorage
+                        const stored = localStorage.getItem('compare_bikes');
+                        const current = stored ? JSON.parse(stored) : [];
 
-                <Image
-                    src={listing.imageUrl}
-                    alt={listing.title}
-                    fill
-                    sizes={imageSizes.listingCard}
-                    quality={imageQuality.listingCard}
-                    placeholder="blur"
-                    blurDataURL={defaultBlurDataURL}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
+                        if (current.includes(listing.id)) {
+                            const newIds = current.filter((id: string) => id !== listing.id);
+                            localStorage.setItem('compare_bikes', JSON.stringify(newIds));
+                            toast.info("Removed from comparison");
+                        } else {
+                            if (current.length >= 3) {
+                                toast.error("Max 3 bikes allowed for comparison");
+                                return;
+                            }
+                            localStorage.setItem('compare_bikes', JSON.stringify([...current, listing.id]));
+                            toast.success("Added to comparison");
+                        }
 
-                {/* Overlay Gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 to-transparent opacity-60" />
+                        // Dispatch custom event for FloatingBar
+                        window.dispatchEvent(new Event('comparison_updated'));
+                    }}
+                    aria-label={`Compare ${listing.title}`}
+                    className="p-2 rounded-full bg-black/20 hover:bg-black/40 text-white backdrop-blur-sm transition-colors opacity-0 group-hover:opacity-100 delay-75"
+                >
+                    <GitCompare className="h-4 w-4" />
+                </button>
             </div>
+
+            <Image
+                src={imageUrl}
+                alt={listing.title}
+                fill
+                sizes={imageSizes.listingCard}
+                quality={imageQuality.listingCard}
+                placeholder="blur"
+                blurDataURL={defaultBlurDataURL}
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+            />
+
+            {/* Overlay Gradient */}
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 to-transparent opacity-60" />
 
             {/* Content */}
             <div className="p-5">
@@ -75,9 +138,9 @@ export default function ListingCard({ listing }: ListingCardProps) {
                 <div className="mb-3 flex items-center justify-between">
                     <div className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-200">
                         <Star className="h-3.5 w-3.5 text-accent-gold" />
-                        {listing.rating.toFixed(1)} seller rating
+                        {rating} seller rating
                     </div>
-                    <span className="text-xs text-slate-500">{listing.ownerType}</span>
+                    <span className="text-xs text-slate-500">{ownerType}</span>
                 </div>
 
                 {/* Specs Grid */}
@@ -88,7 +151,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
                     </div>
                     <div className="flex items-center gap-1.5">
                         <Gauge className="h-3.5 w-3.5 text-slate-500" />
-                        <span>{listing.kms.toLocaleString()} km</span>
+                        <span>{kmsDisplay} km</span>
                     </div>
                     <div className="flex items-center gap-1.5 col-span-2">
                         <MapPin className="h-3.5 w-3.5 text-slate-500" />

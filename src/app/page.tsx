@@ -6,12 +6,75 @@ import Link from "next/link";
 import Image from "next/image";
 import { defaultBlurDataURL, imageQuality, imageSizes } from "@/lib/image";
 
-export default function Home() {
-  const featuredListings = demoListings.slice(0, 3);
-  const recentListings = demoListings.slice(3, 6);
+import VerifiedListingCard from "@/components/marketplace/VerifiedListingCard";
+import { cookies } from "next/headers";
+import { ListingService } from "@/lib/services/listing.service";
+import { MapPin } from "lucide-react";
+
+export default async function Home() {
+  const cookieStore = await cookies();
+  const selectedCity = cookieStore.get("user_city")?.value || "All India";
+
+  // Normalize Supabase FK joins (arrays → single objects)
+  const normalizeListings = (items: any[]) =>
+    items.map((l: any) => ({
+      ...l,
+      seller: Array.isArray(l.seller) ? l.seller[0] ?? null : l.seller,
+    }));
+
+  // Fetch Real Verified Listings (All)
+  const { listings: rawListings } = await ListingService.getListings({ limit: 6 }).catch(() => ({ listings: [] }));
+  const realListings = normalizeListings(rawListings);
+
+  // Fetch City Listings if selected
+  let localListings: any[] = [];
+  if (selectedCity && selectedCity !== "All India") {
+    const data = await ListingService.getListings({ city: selectedCity, limit: 3 }).catch(() => ({ listings: [] }));
+    localListings = normalizeListings(data.listings);
+  }
+
+  // Fetch Fresh Arrivals (Real Data)
+  const { listings: recentListings } = await ListingService.getListings({ limit: 3 }).catch(() => ({ listings: [] }));
+  const featuredListings = realListings.slice(3, 6);
+
+  // FAQ Schema for AEO (Answer Engine Optimization)
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How to buy a certified bike on Do-Pahiyaa?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Browse verified listings, shortlist your favorite bike, and connect with the seller via our secure Lead Unlock system. Our platform ensures transparency and verified documents."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I sell my used bike locally in Mumbai or Delhi?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes! Do-Pahiyaa supports programmatic SEO pages for all major Indian cities. Just list your bike, and it will be featured in local search results for your specific city."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is ownership transfer handled by Do-Pahiyaa?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "We handle all RTO documentation and ownership transfers for verified dealer listings across major hubs like Pune, Bangalore, and Hyderabad."
+        }
+      }
+    ]
+  };
 
   return (
     <div className="space-y-14 pb-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       {/* Hero Section */}
       <section>
         <Hero />
@@ -100,14 +163,63 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured Listings */}
+      {/* Local Verified Inventory (City-Wise Priority) */}
+      {selectedCity && selectedCity !== "All India" && localListings.length > 0 && (
+        <section>
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-2">
+              <MapPin className="h-6 w-6 text-brand-500" />
+              Bikes in <span className="text-brand-400">{selectedCity}</span>
+            </h2>
+            <Link href={`/listings?city=${selectedCity}`} className="text-brand-400 hover:text-brand-300 font-medium flex items-center gap-1 transition-colors">
+              View All in {selectedCity} <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {localListings.map((listing) => (
+              <VerifiedListingCard key={listing.id} listing={listing} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Verified Inventory (Real Data - All India) */}
       <section>
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-2">
-            <Flame className="h-6 w-6 text-brand-500" />
-            Trending Deals
+            <ShieldCheck className="h-6 w-6 text-brand-500" />
+            Latest Verified Inventory
           </h2>
-          <Link href="/search" className="text-brand-400 hover:text-brand-300 font-medium flex items-center gap-1 transition-colors">
+          <Link href="/listings" className="text-brand-400 hover:text-brand-300 font-medium flex items-center gap-1 transition-colors">
+            View All <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+
+        {realListings.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {realListings.map((listing) => (
+              <VerifiedListingCard key={listing.id} listing={listing} />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-xl border border-dashed border-white/10 bg-white/5 p-12 text-center">
+            <p className="text-slate-400">No verified listings available yet. Be the first to sell!</p>
+            <Link href="/sell" className="mt-4 inline-block rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-500">
+              Sell Your Bike
+            </Link>
+          </div>
+        )}
+      </section>
+
+      {/* Live Auctions (Demo/Visual Only) */}
+      <section>
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-2">
+            <Flame className="h-6 w-6 text-accent-gold" />
+            Live Auctions (Coming Soon)
+          </h2>
+          <Link href="/auctions" className="text-brand-400 hover:text-brand-300 font-medium flex items-center gap-1 transition-colors">
             View All <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
@@ -202,6 +314,27 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {recentListings.map((listing) => (
             <ListingCard key={listing.id} listing={listing} />
+          ))}
+        </div>
+      </section>
+
+      {/* Internal Linking SEO Footprint (Popular Locations) */}
+      <section className="pt-12 border-t border-white/5">
+        <h3 className="text-white font-bold mb-8 uppercase tracking-widest text-xs opacity-50">Explore Popular Markets</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-y-4 gap-x-8">
+          {[
+            "Mumbai", "Delhi", "Bangalore", "Hyderabad", "Chennai",
+            "Kolkata", "Pune", "Ahmedabad", "Jaipur", "Lucknow",
+            "Surat", "Kanpur", "Nagpur", "Indore", "Thane",
+            "Bhopal", "Patna", "Vadodara", "Ghaziabad", "Ludhiana"
+          ].map((city) => (
+            <Link
+              key={city}
+              href={`/buy-used-bikes/${city.toLowerCase()}`}
+              className="text-slate-500 hover:text-brand-400 text-sm transition-colors"
+            >
+              Used Bikes in {city}
+            </Link>
           ))}
         </div>
       </section>
