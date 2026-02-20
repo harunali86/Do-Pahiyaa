@@ -30,17 +30,19 @@ export default function LoginPage() {
         // --- MOCK LOGIN FOR DEMO (Requested by User) ---
         if (email === 'admin@dopahiyaa.com' && password === 'admin123') {
             toast.success("Login Successful (Demo Mode)");
-            router.push('/admin');
-            setIsLoading(false);
+            document.cookie = "demo-session=admin; path=/; max-age=3600";
+            window.location.href = '/admin';
             return;
         }
         if (email === 'dealer@dopahiyaa.com' && password === 'dealer123') {
             toast.success("Login Successful (Demo Mode)");
-            router.push('/dealer/dashboard');
-            setIsLoading(false);
+            document.cookie = "demo-session=dealer; path=/; max-age=3600";
+            window.location.href = '/dealer/dashboard';
             return;
         }
         // ----------------------------------------------
+
+
 
         try {
             const supabase = createSupabaseBrowserClient();
