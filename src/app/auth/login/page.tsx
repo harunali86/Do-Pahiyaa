@@ -27,6 +27,21 @@ export default function LoginPage() {
         const email = formData.get("email") as string;
         const password = formData.get("password") as string;
 
+        // --- MOCK LOGIN FOR DEMO (Requested by User) ---
+        if (email === 'admin@dopahiyaa.com' && password === 'admin123') {
+            toast.success("Login Successful (Demo Mode)");
+            router.push('/admin');
+            setIsLoading(false);
+            return;
+        }
+        if (email === 'dealer@dopahiyaa.com' && password === 'dealer123') {
+            toast.success("Login Successful (Demo Mode)");
+            router.push('/dealer/dashboard');
+            setIsLoading(false);
+            return;
+        }
+        // ----------------------------------------------
+
         try {
             const supabase = createSupabaseBrowserClient();
             const { error } = await supabase.auth.signInWithPassword({
@@ -35,6 +50,8 @@ export default function LoginPage() {
             });
 
             if (error) throw error;
+            // ... rest of the existing logic
+
 
             // Fetch role to redirect correctly
             const { data: { user } } = await supabase.auth.getUser();

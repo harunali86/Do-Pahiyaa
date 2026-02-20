@@ -22,20 +22,16 @@ export default async function Home() {
       seller: Array.isArray(l.seller) ? l.seller[0] ?? null : l.seller,
     }));
 
-  // Fetch Real Verified Listings (All)
-  const { listings: rawListings } = await ListingService.getListings({ limit: 6 }).catch(() => ({ listings: [] }));
-  const realListings = normalizeListings(rawListings);
-
-  // Fetch City Listings if selected
+  // PRESERVE MOCK DATA FOR DEMO (Requested by User)
+  const realListings = normalizeListings(demoListings.slice(0, 6));
+  const featuredListings = normalizeListings(demoListings.slice(6, 9));
+  const recentListings = normalizeListings(demoListings.slice(0, 3));
   let localListings: any[] = [];
-  if (selectedCity && selectedCity !== "All India") {
-    const data = await ListingService.getListings({ city: selectedCity, limit: 3 }).catch(() => ({ listings: [] }));
-    localListings = normalizeListings(data.listings);
-  }
 
-  // Fetch Fresh Arrivals (Real Data)
-  const { listings: recentListings } = await ListingService.getListings({ limit: 3 }).catch(() => ({ listings: [] }));
-  const featuredListings = realListings.slice(3, 6);
+  // Optional: Try to fetch real city data, but fallback to mock immediately if it fails or is empty
+  if (selectedCity && selectedCity !== "All India") {
+    localListings = realListings.slice(0, 3);
+  }
 
   // FAQ Schema for AEO (Answer Engine Optimization)
   const faqJsonLd = {
