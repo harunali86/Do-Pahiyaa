@@ -29,7 +29,7 @@ export default function Navbar() {
 
             // --- DEMO MODE UI MOCKING ---
             const isDemoMode = true;
-            if (isDemoMode && !session?.user) {
+            if (isDemoMode && !session?.user && typeof window !== 'undefined') {
                 const demoSession = document.cookie.split('; ').find(row => row.startsWith('demo-session='))?.split('=')[1];
                 if (demoSession) {
                     setUser({

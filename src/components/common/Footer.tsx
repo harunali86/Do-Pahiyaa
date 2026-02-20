@@ -15,101 +15,67 @@ import {
 
 export default function Footer() {
     return (
-        <footer className="bg-slate-950 border-t border-white/5 pt-16 pb-24 md:pb-8 relative overflow-hidden">
-            {/* Background decoration */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-brand-500/50 to-transparent" />
-
-            <div className="max-w-7xl mx-auto px-4 md:px-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
-
-                    {/* Brand Column */}
-                    <div className="space-y-4">
-                        <Link href="/" className="text-2xl font-black tracking-tighter text-white">
-                            DO <span className="text-brand-500">PAHIYAA</span>
+        <footer className="bg-slate-950 border-t border-white/5 pt-12 pb-8 overflow-hidden">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-10">
+                    {/* Brand */}
+                    <div className="col-span-2 lg:col-span-2 space-y-4">
+                        <Link href="/" className="text-xl font-black tracking-tighter text-white">
+                            DO <span className="text-brand-500 uppercase">Pahiyaa</span>
                         </Link>
-                        <p className="text-slate-400 text-sm leading-relaxed max-w-xs">
-                            India&apos;s first hybrid marketplace for premium pre-owned superbikes.
-                            Bid, Buy, and Sell with confidence.
+                        <p className="text-slate-500 text-sm leading-relaxed max-w-sm">
+                            India&apos;s leading hybrid marketplace for certified pre-owned superbikes.
+                            Verified documents, transparent pricing, and instant financing.
                         </p>
-                        <div className="flex gap-4 pt-2">
+                        <div className="flex gap-3">
+                            <SocialLink icon={Instagram} href="https://www.instagram.com/dopahiyaa" />
                             <SocialLink icon={Facebook} href="https://www.facebook.com/share/1FHuRrzBBK/" />
-                            <SocialLink icon={Instagram} href="https://www.instagram.com/dopahiyaa?utm_source=qr&igsh=cDk3NHR4dDd2Nm1m" />
                             <SocialLink icon={Linkedin} href="#" />
-                            <SocialLink icon={Youtube} href="#" />
+                        </div>
+                    </div>
+
+                    {/* Quick links flattened */}
+                    <div>
+                        <h4 className="text-white font-bold text-sm mb-4 uppercase tracking-widest opacity-50">Market</h4>
+                        <ul className="space-y-2 text-sm text-slate-400">
+                            <li><Link href="/search" className="hover:text-brand-400">Buy Bike</Link></li>
+                            <li><Link href="/sell" className="hover:text-brand-400">Sell Bike</Link></li>
+                            <li><Link href="/auctions" className="hover:text-brand-400">Auctions</Link></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 className="text-white font-bold text-sm mb-4 uppercase tracking-widest opacity-50">Company</h4>
+                        <ul className="space-y-2 text-sm text-slate-400">
+                            <li><Link href="/about" className="hover:text-brand-400">About</Link></li>
+                            <li><Link href="/blog" className="hover:text-brand-400">Blog</Link></li>
+                            <li><Link href="/contact" className="hover:text-brand-400">Support</Link></li>
+                        </ul>
+                    </div>
+
+                    {/* Compact Contact */}
+                    <div className="col-span-2 md:col-span-1">
+                        <h4 className="text-white font-bold text-sm mb-4 uppercase tracking-widest opacity-50">Contact</h4>
+                        <div className="space-y-2 text-sm text-slate-500">
+                            <div className="flex items-center gap-2">
+                                <Phone className="w-3.5 h-3.5 text-brand-500" />
+                                <span>+91 888-999-0000</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Mail className="w-3.5 h-3.5 text-brand-500" />
+                                <span>care@dopahiyaa.com</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Quick Links */}
-                <div>
-                    <h3 className="text-white font-bold mb-6">Marketplace</h3>
-                    <ul className="space-y-3 text-sm text-slate-400">
-                        <FooterLink href="/search">Buy a Bike</FooterLink>
-                        <FooterLink href="/sell">Sell Your Bike</FooterLink>
-                        <FooterLink href="/auctions">Live Auctions</FooterLink>
-                        <FooterLink href="/dealer/dashboard">Dealer Dashboard</FooterLink>
-                        <li className="text-slate-600 cursor-not-allowed">Compare Models (Soon)</li>
-                    </ul>
-                </div>
-
-                {/* Company & Support */}
-                <div>
-                    <h3 className="text-white font-bold mb-6">Company</h3>
-                    <ul className="space-y-3 text-sm text-slate-400">
-                        <FooterLink href="/about">About Us</FooterLink>
-                        <li className="text-slate-600 cursor-not-allowed">Careers</li>
-                        <FooterLink href="/blog">Blog & News</FooterLink>
-                        <li>
-                            <a
-                                href="https://www.google.com/search?q=road+buddy+reviews&si=AL3DRZEsmMGCryMMFSHJ3StBhOdZ2-6yYkXd_doETEE1OR-qOY0qKlWDHg_DHGrYoUOx79BQ5w5snG1yQXGvoViKTcCqh6RNq5EsgDhLf9wb8QPk2P9iJ8EMOdv-Z1jiCkVrImAXDqEW"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="hover:text-brand-400 transition-colors"
-                            >
-                                Customer Reviews
-                            </a>
-                        </li>
-                        <FooterLink href="/contact">Contact Support</FooterLink>
-                        <li className="text-slate-600 cursor-not-allowed">Trust & Safety</li>
-                    </ul>
-                </div>
-
-                {/* Newsletter */}
-                <div>
-                    <h3 className="text-white font-bold mb-6">Stay Updated</h3>
-                    <p className="text-slate-400 text-sm mb-4">
-                        Get the latest auction alerts and market trends.
-                    </p>
-                    <div className="flex gap-2">
-                        <input
-                            type="email"
-                            placeholder="Enter email"
-                            className="bg-slate-900 border border-white/10 rounded-lg px-4 py-2 text-sm text-white w-full focus:outline-none focus:border-brand-500/50"
-                        />
-                        <button className="bg-brand-600 hover:bg-brand-500 text-white p-2 rounded-lg transition-colors">
-                            <Mail className="w-5 h-5" />
-                        </button>
+                <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] text-slate-600 uppercase tracking-widest">
+                    <p>© 2026 Do Pahiyaa. Powered by Harun Shaikh.</p>
+                    <div className="flex gap-6">
+                        <Link href="/privacy" className="hover:text-slate-400 transition-colors">Privacy</Link>
+                        <Link href="/terms" className="hover:text-slate-400 transition-colors">Terms</Link>
+                        <Link href="/sitemap" className="hover:text-slate-400 transition-colors">Sitemap</Link>
                     </div>
-
-                    <div className="mt-8 space-y-2 text-sm text-slate-500">
-                        <div className="flex items-center gap-2">
-                            <MapPin className="w-4 h-4 text-brand-500" />
-                            <span>Indiranagar, Bengaluru</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Phone className="w-4 h-4 text-brand-500" />
-                            <span>+91 888-999-0000</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-600">
-                <p>© 2026 Do Pahiyaa. All rights reserved.</p>
-                <div className="flex gap-6">
-                    <Link href="/privacy" className="hover:text-slate-400 transition-colors">Privacy Policy</Link>
-                    <Link href="/terms" className="hover:text-slate-400 transition-colors">Terms of Service</Link>
-                    <Link href="/sitemap" className="hover:text-slate-400 transition-colors">Sitemap</Link>
                 </div>
             </div>
         </footer>
