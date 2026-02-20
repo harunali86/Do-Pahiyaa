@@ -32,30 +32,25 @@ export default async function Home() {
 
 
 
-    // 1. Try to fetch REAL data from Supabase
-    let realListings: any[] = [];
-    let featuredListings: any[] = [];
-    let recentListings: any[] = [];
-    let localListings: any[] = [];
-
+    // 1. Fetch Real data but prioritze Mock for Demo Stability
+    let displayListings: any[] = [];
     try {
-      const { listings } = await ListingService.getListings({ limit: 9 });
-      if (listings && listings.length > 0) {
-        realListings = normalizeListings(listings.slice(0, 6));
-        featuredListings = normalizeListings(listings.slice(6, 9));
-        recentListings = normalizeListings(listings.slice(0, 3));
-      } else {
-        // Fallback to mock if DB is empty
-        realListings = normalizeListings(demoListings.slice(0, 6));
-        featuredListings = normalizeListings(demoListings.slice(6, 9));
-        recentListings = normalizeListings(demoListings.slice(0, 3));
-      }
+      const { listings: dbListings } = await ListingService.getListings({ limit: 10 });
+      // Merge: Mock first, then real
+      const normalizedMock = normalizeListings(demoListings);
+      const normalizedReal = normalizeListings(dbListings || []);
+
+      // Combine for variety, but keep mocks first for "vibe"
+      displayListings = [...normalizedMock, ...normalizedReal];
     } catch (e) {
-      console.error("Home page DB fetch failed, falling back to mock:", e);
-      realListings = normalizeListings(demoListings.slice(0, 6));
-      featuredListings = normalizeListings(demoListings.slice(6, 9));
-      recentListings = normalizeListings(demoListings.slice(0, 3));
+      console.error("Home page DB fetch failed:", e);
+      displayListings = normalizeListings(demoListings);
     }
+
+    const realListings = displayListings.slice(0, 6);
+    const featuredListings = displayListings.slice(6, 9);
+    const recentListings = displayListings.slice(0, 3);
+
 
     // 2. Local City Logic
     if (selectedCity && selectedCity !== "All India" && realListings.length > 0) {
