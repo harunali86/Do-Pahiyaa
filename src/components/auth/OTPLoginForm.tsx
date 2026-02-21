@@ -147,26 +147,26 @@ export default function OTPLoginForm() {
                                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                                 className="w-full bg-slate-950/50 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/50 transition-all placeholder:text-slate-600 font-mono text-lg tracking-widest text-center"
                                 placeholder="• • • • • •"
-                                required
                             />
                         </div>
+                    </div>
 
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-brand-500/25 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
-                        >
-                            {loading ? (
-                                <>
-                                    <Loader2 className="w-5 h-5 animate-spin" />
-                                    Verifying...
-                                </>
-                            ) : (
-                                <>
-                                    Verify & Login <ArrowRight className="w-5 h-5" />
-                                </>
-                            )}
-                        </button>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-brand-500/25 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                    >
+                        {loading ? (
+                            <>
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                                Verifying...
+                            </>
+                        ) : (
+                            <>
+                                Verify & Login <ArrowRight className="w-5 h-5" />
+                            </>
+                        )}
+                    </button>
                 </form>
             )}
         </div>
