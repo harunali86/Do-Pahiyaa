@@ -166,12 +166,12 @@ export default function ProfileSettingsPage() {
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={`w-full text-left px-4 py-2.5 rounded-lg font-medium flex items-center gap-3 transition-all ${activeTab === tab.id
-                                    ? tab.id === "danger"
-                                        ? "bg-red-500/10 text-red-400 border border-red-500/20"
-                                        : "bg-brand-500/10 text-brand-400 border border-brand-500/20"
-                                    : tab.id === "danger"
-                                        ? "text-red-400/60 hover:bg-red-500/5 hover:text-red-400"
-                                        : "text-slate-400 hover:text-white hover:bg-white/5"
+                                ? tab.id === "danger"
+                                    ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                                    : "bg-brand-500/10 text-brand-400 border border-brand-500/20"
+                                : tab.id === "danger"
+                                    ? "text-red-400/60 hover:bg-red-500/5 hover:text-red-400"
+                                    : "text-slate-400 hover:text-white hover:bg-white/5"
                                 }`}
                         >
                             {tab.icon}
@@ -196,11 +196,15 @@ export default function ProfileSettingsPage() {
                                     </div>
                                     <div>
                                         <h2 className="text-xl font-bold text-white">{profile?.full_name || "Your Name"}</h2>
-                                        <p className="text-sm text-slate-500">{profile?.email}</p>
+                                        <p className="text-sm text-slate-500">
+                                            {profile?.email && (profile.email.includes("@mock.local") || profile.email.includes("@dopahiyaa.local"))
+                                                ? "Verified Phone Account"
+                                                : profile?.email}
+                                        </p>
                                         <div className="flex items-center gap-2 mt-1">
                                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${isAdmin ? "bg-red-500/15 text-red-400 border border-red-500/20" :
-                                                    isDealer ? "bg-blue-500/15 text-blue-400 border border-blue-500/20" :
-                                                        "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
+                                                isDealer ? "bg-blue-500/15 text-blue-400 border border-blue-500/20" :
+                                                    "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
                                                 }`}>
                                                 {isAdmin && <Shield className="w-3 h-3 mr-1" />}
                                                 {isDealer && <Building2 className="w-3 h-3 mr-1" />}
@@ -232,7 +236,7 @@ export default function ProfileSettingsPage() {
                                             <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-500" />
                                             <Input
                                                 id="email"
-                                                value={profile?.email || ""}
+                                                value={profile?.email && (profile.email.includes("@mock.local") || profile.email.includes("@dopahiyaa.local")) ? "Hidden (Phone Auth)" : (profile?.email || "")}
                                                 disabled
                                                 className="pl-10 bg-slate-900/50 border-white/5 text-slate-400 cursor-not-allowed"
                                             />
