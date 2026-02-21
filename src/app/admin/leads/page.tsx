@@ -3,16 +3,13 @@ export const dynamic = "force-dynamic";
 import { LeadService } from "@/lib/services/lead.service";
 import { AdminLeadsTable } from "@/components/admin/leads/AdminLeadsTable";
 
-interface AdminLeadsPageProps {
-    searchParams: { [key: string]: string | string[] | undefined };
-}
-
-export default async function AdminLeadsPage({ searchParams }: AdminLeadsPageProps) {
-    const page = Number(searchParams.page) || 1;
-    const search = typeof searchParams.search === 'string' ? searchParams.search : undefined;
-    const status = typeof searchParams.status === 'string' ? searchParams.status : undefined;
-    const make = typeof searchParams.make === 'string' ? searchParams.make : undefined;
-    const city = typeof searchParams.city === 'string' ? searchParams.city : undefined;
+export default async function AdminLeadsPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+    const resolvedParams = await searchParams;
+    const page = Number(resolvedParams.page) || 1;
+    const search = typeof resolvedParams.search === 'string' ? resolvedParams.search : undefined;
+    const status = typeof resolvedParams.status === 'string' ? resolvedParams.status : undefined;
+    const make = typeof resolvedParams.make === 'string' ? resolvedParams.make : undefined;
+    const city = typeof resolvedParams.city === 'string' ? resolvedParams.city : undefined;
 
     // Fetch Paginated Leads
     const { leads, metadata } = await LeadService.getAllAdminLeads({

@@ -18,7 +18,6 @@ import {
     Gauge
 } from "lucide-react";
 import ImageGallery from "@/components/marketplace/ImageGallery";
-import { demoListings } from "@/lib/demo/mock-data";
 import { ListingService } from "@/lib/services/listing.service";
 import { formatINR, cn } from "@/lib/utils";
 import LeadCaptureButton from "@/components/marketplace/LeadCaptureButton";

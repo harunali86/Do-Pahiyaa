@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 type ConfigKey =
     | 'lead_unlock_price'
+    | 'dealer_onboarding_credits'
     | 'free_listing_quota'
     | 'featured_ad_price'
     | 'dealer_listing_price'

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Phone, MessageSquare, Bike, User, ShieldCheck } from "lucide-react";
+import { Search, Phone, Bike, User, ShieldCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -79,12 +79,11 @@ export function AdminLeadsTable({ initialLeads, metadata }: AdminLeadsTableProps
             </div>
 
             <div className="glass-panel border border-white/5 overflow-hidden p-6">
-
                 {/* Filters */}
                 <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
                     <div className="flex flex-wrap gap-2">
                         <Select value={statusFilter} onValueChange={setStatusFilter}>
-                            <SelectTrigger className="w-[140px] bg-slate-900 border-white/10">
+                            <SelectTrigger className="w-[140px] bg-slate-900 border-white/10 text-white">
                                 <SelectValue placeholder="Status" />
                             </SelectTrigger>
                             <SelectContent className="bg-slate-900 border-white/10 text-white">
@@ -98,7 +97,7 @@ export function AdminLeadsTable({ initialLeads, metadata }: AdminLeadsTableProps
                         </Select>
 
                         <Select value={makeFilter} onValueChange={setMakeFilter}>
-                            <SelectTrigger className="w-[140px] bg-slate-900 border-white/10">
+                            <SelectTrigger className="w-[140px] bg-slate-900 border-white/10 text-white">
                                 <SelectValue placeholder="Brand" />
                             </SelectTrigger>
                             <SelectContent className="bg-slate-900 border-white/10 text-white">
@@ -110,7 +109,7 @@ export function AdminLeadsTable({ initialLeads, metadata }: AdminLeadsTableProps
                         </Select>
 
                         <Select value={cityFilter} onValueChange={setCityFilter}>
-                            <SelectTrigger className="w-[140px] bg-slate-900 border-white/10">
+                            <SelectTrigger className="w-[140px] bg-slate-900 border-white/10 text-white">
                                 <SelectValue placeholder="City" />
                             </SelectTrigger>
                             <SelectContent className="bg-slate-900 border-white/10 text-white">
@@ -134,61 +133,53 @@ export function AdminLeadsTable({ initialLeads, metadata }: AdminLeadsTableProps
                     </div>
                 </div>
 
-                {/* Data Table */}
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr className="bg-slate-900/50 text-xs text-slate-500 uppercase tracking-wider font-semibold border-b border-white/5">
-                                <th className="py-3 px-6">Buyer</th>
-                                <th className="py-3 px-6">Interest (Bike)</th>
-                                <th className="py-3 px-6">Status</th>
-                                <th className="py-3 px-6">Unlocked By</th>
-                                <th className="py-3 px-6">Date</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-white/5">
+                <div className="w-full">
+                    <div className="flex bg-slate-900/50 text-xs text-slate-500 uppercase tracking-wider font-semibold border-b border-white/5 py-3">
+                        <div className="w-[25%] px-6">Buyer</div>
+                        <div className="w-[30%] px-6">Interest (Bike)</div>
+                        <div className="w-[15%] px-6">Status</div>
+                        <div className="w-[20%] px-6">Unlocked By</div>
+                        <div className="w-[10%] px-6">Date</div>
+                    </div>
+
+                    {filteredLeads.length > 0 ? (
+                        <div className="max-h-[640px] overflow-y-auto">
                             {filteredLeads.map((lead) => (
-                                <tr key={lead.id} className="group hover:bg-white/[0.02] transition-colors">
-                                    <td className="py-4 px-6">
+                                <div key={lead.id} className="flex border-b border-white/5 hover:bg-white/[0.02] transition-colors items-center text-sm">
+                                    <div className="w-[25%] py-4 px-6">
                                         <div className="flex flex-col">
-                                            <span className="text-white font-medium flex items-center gap-2">
+                                            <span className="text-white font-medium flex items-center gap-2 truncate">
                                                 <User className="h-3 w-3 text-slate-400" />
                                                 {lead.buyer?.name || "Unknown Buyer"}
                                             </span>
                                             <span className="text-xs text-slate-500 flex items-center gap-1 mt-1">
                                                 <Phone className="h-3 w-3" /> {lead.buyer?.phone || "-"}
                                             </span>
-                                            <span className="text-xs text-slate-500 flex items-center gap-1">
-                                                <MessageSquare className="h-3 w-3" /> {lead.buyer?.email || "-"}
-                                            </span>
                                         </div>
-                                    </td>
-                                    <td className="py-4 px-6">
+                                    </div>
+                                    <div className="w-[30%] py-4 px-6">
                                         <div className="flex flex-col">
-                                            <span className="text-white font-medium flex items-center gap-2">
+                                            <span className="text-white font-medium flex items-center gap-2 truncate">
                                                 <Bike className="h-3 w-3 text-brand-400" />
                                                 {lead.listing?.title || "Untitled Listing"}
                                             </span>
                                             <span className="text-xs text-slate-500 mt-1">
                                                 ₹{Number(lead.listing?.price || 0).toLocaleString('en-IN')} • {lead.listing?.city || "-"}
                                             </span>
-                                            <span className="text-[10px] text-slate-600 truncate max-w-[150px]">
-                                                Seller: {lead.listing?.seller_name || "-"}
-                                            </span>
                                         </div>
-                                    </td>
-                                    <td className="py-4 px-6">
+                                    </div>
+                                    <div className="w-[15%] py-4 px-6">
                                         <Badge variant="outline" className={`
-                                                uppercase text-[10px] tracking-wide border
-                                                ${lead.status === 'new' ? 'text-blue-400 border-blue-400/20 bg-blue-400/5' :
+                                            uppercase text-[10px] tracking-wide border
+                                            ${lead.status === 'new' ? 'text-blue-400 border-blue-400/20 bg-blue-400/5' :
                                                 lead.status === 'unlocked' ? 'text-yellow-400 border-yellow-400/20 bg-yellow-400/5' :
                                                     lead.status === 'converted' ? 'text-green-400 border-green-400/20 bg-green-400/5' :
                                                         'text-slate-400 border-slate-400/20 bg-slate-400/5'}
-                                            `}>
+                                        `}>
                                             {lead.status}
                                         </Badge>
-                                    </td>
-                                    <td className="py-4 px-6">
+                                    </div>
+                                    <div className="w-[20%] py-4 px-6">
                                         {lead.unlocked_by ? (
                                             <div className="flex flex-col">
                                                 <span className="text-accent-gold text-sm font-medium flex items-center gap-1">
@@ -202,16 +193,14 @@ export function AdminLeadsTable({ initialLeads, metadata }: AdminLeadsTableProps
                                         ) : (
                                             <span className="text-xs text-slate-600 italic">Locked</span>
                                         )}
-                                    </td>
-                                    <td className="py-4 px-6 text-xs text-slate-500 font-mono">
+                                    </div>
+                                    <div className="w-[10%] py-4 px-6 text-xs text-slate-500 font-mono">
                                         {formatDate(lead.created_at)}
-                                    </td>
-                                </tr>
+                                    </div>
+                                </div>
                             ))}
-                        </tbody>
-                    </table>
-
-                    {filteredLeads.length === 0 && (
+                        </div>
+                    ) : (
                         <div className="py-20 text-center">
                             <p className="text-slate-500">No leads found matching criteria.</p>
                         </div>

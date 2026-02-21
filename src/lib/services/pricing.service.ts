@@ -101,7 +101,7 @@ export class PricingService {
         const { filters, quantity } = normalizeInput(input);
         const supabase = await createSupabaseServerClient();
 
-        const { data, error } = await supabase.rpc("calculate_subscription_price_v2", {
+        const { data, error } = await supabase.rpc("calculate_subscription_price_v3", {
             p_filters: filters,
             p_quantity: quantity,
         });
@@ -116,16 +116,25 @@ export class PricingService {
     static async purchaseSubscription(
         dealerId: string,
         input: LegacyInput,
-        expectedTotal?: number
+        expectedTotal?: number,
+        idempotencyKey?: string
     ): Promise<PurchaseResult> {
+        if (!dealerId) {
+            throw new Error("Dealer id is required");
+        }
+
         const { filters, quantity } = normalizeInput(input);
         const supabase = await createSupabaseServerClient();
+        const generatedIdempotencyKey =
+            idempotencyKey || (typeof crypto !== "undefined" && "randomUUID" in crypto
+                ? crypto.randomUUID()
+                : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
 
-        const { data, error } = await supabase.rpc("purchase_subscription_v2", {
-            p_dealer_id: dealerId,
+        const { data, error } = await supabase.rpc("purchase_subscription_v3", {
             p_filters: filters,
             p_quota: quantity,
             p_expected_total: expectedTotal ?? null,
+            p_idempotency_key: generatedIdempotencyKey,
         });
 
         if (error) {

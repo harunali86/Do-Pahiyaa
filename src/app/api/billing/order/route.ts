@@ -1,12 +1,11 @@
 import { NextRequest } from "next/server";
-import { BillingService } from "@/lib/services/billing.service";
+import { PaymentService } from "@/lib/services/payment.service";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
 import { z } from "zod";
 
 const createOrderSchema = z.object({
-    credits: z.number().int().positive(),
-    amount: z.number().int().positive(),
+    leadQuantity: z.number().int().positive(),
 });
 
 export async function POST(req: NextRequest) {
@@ -17,10 +16,10 @@ export async function POST(req: NextRequest) {
         if (!user) return apiError("Unauthorized", 401);
 
         const body = await req.json();
-        const { credits, amount } = createOrderSchema.parse(body);
-        const order = await BillingService.createCreditsOrder(user.id, credits, amount);
+        const { leadQuantity } = createOrderSchema.parse(body);
+        const order = await PaymentService.createOrder(user.id, leadQuantity);
 
-        return apiSuccess(order, 201);
+        return apiSuccess({ order }, 201);
     } catch (error) {
         return handleApiError(error);
     }

@@ -13,11 +13,13 @@ export async function GET(req: NextRequest) {
         const token = url.searchParams.get("hub.verify_token");
         const challenge = url.searchParams.get("hub.challenge");
 
+        // Verify Token for Do-Pahiyaa WABA
         const VERIFY_TOKEN = process.env.META_WEBHOOK_VERIFY_TOKEN || "dopahiyaa_webhook_secret";
 
         if (mode && token) {
             if (mode === "subscribe" && token === VERIFY_TOKEN) {
-                console.log("✅ WABA Webhook Verified");
+                console.log("✅ WABA Webhook Verified Succesfully");
+                // The challenge must be returned as plain text
                 return new Response(challenge, {
                     status: 200,
                     headers: { "Content-Type": "text/plain" },
@@ -40,11 +42,13 @@ export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
 
-        // Log incoming event for debugging
+        // Log incoming event for debugging and audit
         console.log("📥 WABA Webhook Event:", JSON.stringify(body, null, 2));
 
         if (body.object === "whatsapp_business_account") {
-            // Acknowledge receipt
+            // TODO: Process messages, status updates, etc.
+
+            // Mandatory acknowledgment
             return new NextResponse("EVENT_RECEIVED", { status: 200 });
         }
 

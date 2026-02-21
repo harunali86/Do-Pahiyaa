@@ -1,13 +1,45 @@
-"use client";
-
-import { demoAuctions } from "@/lib/demo/mock-data";
 import AuctionCard from "@/components/auction/AuctionCard";
 import { Search, SlidersHorizontal, ArrowUpRight } from "lucide-react";
+import { AuctionService } from "@/lib/services/auction.service";
 
-export default function AuctionsPage() {
-    const liveAuctions = demoAuctions.filter((a) => a.status === "live");
-    const upcomingAuctions = demoAuctions.filter((a) => a.status === "scheduled");
-    const endedAuctions = demoAuctions.filter((a) => a.status === "ended");
+export const dynamic = "force-dynamic";
+
+type AuctionCardModel = {
+    id: string;
+    status: string;
+    listingTitle: string;
+    seller: string;
+    city: string;
+    currentPrice: number;
+    bids: number;
+    imageUrl: string;
+    startTime?: string | null;
+    endTime?: string | null;
+};
+
+export default async function AuctionsPage() {
+    let auctionCards: AuctionCardModel[] = [];
+    try {
+        const liveAuctions = await AuctionService.getAuctions();
+        auctionCards = (liveAuctions || []).map((auction: any) => ({
+            id: auction.id,
+            status: auction.status || "scheduled",
+            listingTitle: auction.listing?.title || "Untitled Auction",
+            seller: auction.highest_bidder?.full_name || "Verified Seller",
+            city: auction.listing?.city || "Unknown",
+            currentPrice: Number(auction.current_highest_bid || auction.start_price || 0),
+            bids: Number(auction.bids_count || 0),
+            imageUrl: auction.listing?.images?.[0] || "https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?q=80&w=2940&auto=format&fit=crop",
+            startTime: auction.start_time,
+            endTime: auction.end_time
+        }));
+    } catch (error) {
+        console.error("Auctions page fetch failed:", error);
+    }
+
+    const liveAuctions = auctionCards.filter((a) => a.status === "live");
+    const upcomingAuctions = auctionCards.filter((a) => a.status === "scheduled" || a.status === "paused");
+    const endedAuctions = auctionCards.filter((a) => a.status === "ended" || a.status === "cancelled");
 
     return (
         <div className="min-h-screen pb-20">
@@ -51,6 +83,11 @@ export default function AuctionsPage() {
                     {liveAuctions.map((auction) => (
                         <AuctionCard key={auction.id} auction={auction} />
                     ))}
+                    {liveAuctions.length === 0 && (
+                        <div className="rounded-2xl border border-dashed border-white/10 bg-slate-900/20 p-8 text-center md:col-span-2 lg:col-span-3">
+                            <p className="text-slate-400 text-sm">No live auctions currently. Check upcoming lots.</p>
+                        </div>
+                    )}
                 </div>
             </section>
 
@@ -77,6 +114,11 @@ export default function AuctionsPage() {
                     {endedAuctions.map((auction) => (
                         <AuctionCard key={auction.id} auction={auction} />
                     ))}
+                    {endedAuctions.length === 0 && (
+                        <div className="rounded-2xl border border-dashed border-white/10 bg-slate-900/20 p-8 text-center md:col-span-2 lg:col-span-3">
+                            <p className="text-slate-500 text-sm">No settled/closed auctions yet.</p>
+                        </div>
+                    )}
                 </div>
             </section>
 

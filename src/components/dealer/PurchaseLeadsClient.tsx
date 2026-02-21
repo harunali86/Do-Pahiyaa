@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { CheckCircle, Filter, Info, Loader2 } from "lucide-react";
+import { CheckCircle, Filter, Info, Loader2, Calendar } from "lucide-react";
 import { toast } from "sonner";
+import { useDebounce } from "use-debounce";
 import { calculateDynamicPrice, purchaseFilterPack } from "@/app/actions/pricing";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
@@ -84,11 +85,14 @@ export function PurchaseLeadsClient({
         quantity,
     }), [useFilters, city, region, brand, model, leadType, dateRange, startDate, endDate, quantity]);
 
+    // GEMINI PERFORMANCE PROTOCOL: Debounce payload to prevent excessive RPC calls
+    const [debouncedPayload] = useDebounce(payload, 300);
+
     useEffect(() => {
         const fetchPrice = async () => {
             setCalculating(true);
             try {
-                const result = await calculateDynamicPrice(payload) as PricePreview;
+                const result = await calculateDynamicPrice(debouncedPayload) as PricePreview;
                 if (result.success) {
                     setPriceData(result);
                     setMinQuantity(result.minQuantity || 1);
@@ -103,9 +107,8 @@ export function PurchaseLeadsClient({
             }
         };
 
-        const timer = setTimeout(fetchPrice, 250);
-        return () => clearTimeout(timer);
-    }, [payload]);
+        fetchPrice();
+    }, [debouncedPayload]);
 
     const canPurchase = Boolean(
         priceData?.success &&
@@ -180,8 +183,8 @@ export function PurchaseLeadsClient({
                         <button
                             onClick={() => setUseFilters((prev) => !prev)}
                             className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors ${useFilters
-                                    ? "bg-brand-600 text-white"
-                                    : "bg-slate-700 text-slate-300"
+                                ? "bg-brand-600 text-white"
+                                : "bg-slate-700 text-slate-300"
                                 }`}
                         >
                             {useFilters ? "Enabled" : "Disabled"}
@@ -266,13 +269,14 @@ export function PurchaseLeadsClient({
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-400">Date Range</label>
+                                <label className="text-sm font-medium text-slate-400">Date Range (Quick Set)</label>
                                 <Select value={dateRange} onValueChange={setDateRange}>
                                     <SelectTrigger className="bg-slate-800 border-white/10 text-white">
                                         <SelectValue placeholder="Any Date Range" />
                                     </SelectTrigger>
                                     <SelectContent className="bg-slate-800 border-white/10 text-white">
                                         <SelectItem value="all">Any Date Range</SelectItem>
+                                        <SelectItem value="today">From Today</SelectItem>
                                         {availableDateRanges.map((item) => (
                                             <SelectItem key={item} value={item}>{item}</SelectItem>
                                         ))}
@@ -280,23 +284,25 @@ export function PurchaseLeadsClient({
                                 </Select>
                             </div>
 
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-400">Start Date (optional)</label>
-                                <input
-                                    type="date"
-                                    value={startDate}
-                                    onChange={(e) => setStartDate(e.target.value)}
-                                    className="w-full bg-slate-800 border border-white/10 rounded-md p-2 text-white"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-400">End Date (optional)</label>
-                                <input
-                                    type="date"
-                                    value={endDate}
-                                    onChange={(e) => setEndDate(e.target.value)}
-                                    className="w-full bg-slate-800 border border-white/10 rounded-md p-2 text-white"
-                                />
+                            <div className="grid grid-cols-2 gap-4 col-span-1 md:col-span-2">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-400">Start Date</label>
+                                    <input
+                                        type="date"
+                                        value={startDate}
+                                        onChange={(e) => setStartDate(e.target.value)}
+                                        className="w-full bg-slate-800 border border-white/10 rounded-md p-2 text-white focus:ring-2 focus:ring-brand-500 outline-none"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-400">End Date</label>
+                                    <input
+                                        type="date"
+                                        value={endDate}
+                                        onChange={(e) => setEndDate(e.target.value)}
+                                        className="w-full bg-slate-800 border border-white/10 rounded-md p-2 text-white focus:ring-2 focus:ring-brand-500 outline-none"
+                                    />
+                                </div>
                             </div>
                         </div>
                     )}

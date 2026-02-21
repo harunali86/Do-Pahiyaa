@@ -1,17 +1,38 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Clock, Users, Gavel, ArrowRight } from "lucide-react";
-import { DemoAuction } from "@/lib/demo/mock-data";
 import { defaultBlurDataURL, imageQuality, imageSizes } from "@/lib/image";
 import { formatINR, cn } from "@/lib/utils";
 
+type AuctionCardData = {
+    id: string;
+    status: string;
+    listingTitle: string;
+    seller: string;
+    city: string;
+    currentPrice: number;
+    bids: number;
+    imageUrl: string;
+    startTime?: string | null;
+    endTime?: string | null;
+};
+
 interface AuctionCardProps {
-    auction: DemoAuction;
+    auction: AuctionCardData;
 }
 
 export default function AuctionCard({ auction }: AuctionCardProps) {
     const isLive = auction.status === "live";
     const isEnded = auction.status === "ended";
+    const countdownLabel = (() => {
+        if (isEnded || auction.status === "cancelled") return "Closed";
+        const targetTime = isLive ? auction.endTime : auction.startTime;
+        if (!targetTime) return isLive ? "Live" : "Upcoming";
+        const targetDate = new Date(targetTime);
+        if (!Number.isFinite(targetDate.getTime())) return isLive ? "Live" : "Upcoming";
+        const time = targetDate.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+        return isLive ? `Ends ${time}` : `Starts ${time}`;
+    })();
 
     return (
         <div className="group relative overflow-hidden rounded-2xl bg-slate-900/50 border border-white/5 hover:border-brand-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-brand-500/10">
@@ -48,7 +69,7 @@ export default function AuctionCard({ auction }: AuctionCardProps) {
                 <div className="absolute bottom-3 right-3 z-10">
                     <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 text-white font-mono text-sm">
                         <Clock className="h-3.5 w-3.5 text-accent-gold" />
-                        {isLive ? "14m 32s" : isEnded ? "Closed" : "Starts in 2h"}
+                        {countdownLabel}
                     </div>
                 </div>
             </div>

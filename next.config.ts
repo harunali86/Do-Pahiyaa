@@ -16,6 +16,9 @@ const nextConfig: NextConfig = {
     ],
     unoptimized: true,
     qualities: [70, 75, 80],
+  },
+  turbopack: {
+    root: __dirname
   }
 };
 

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Search, Check, X, Eye, User, Bike, MapPin, IndianRupee, Clock, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { Search, Check, X, Eye, User, Bike, MapPin, IndianRupee, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -14,21 +14,16 @@ interface ModerationTableProps {
 }
 
 export function ModerationTable({ listings: initialListings }: ModerationTableProps) {
-    const [listings, setListings] = useState(initialListings);
+    const [listings, setListings] = useState(initialListings || []);
     const [loadingId, setLoadingId] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
     const [makeFilter, setMakeFilter] = useState("all");
     const [cityFilter, setCityFilter] = useState("all");
-    const [mounted, setMounted] = useState(false);
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
 
     // Get unique makes and cities for filters
-    const uniqueMakes = Array.from(new Set(initialListings.map(l => l.make).filter(Boolean))).sort();
-    const uniqueCities = Array.from(new Set(initialListings.map(l => l.city).filter(Boolean))).sort();
+    const uniqueMakes = Array.from(new Set((initialListings || []).map(l => l.make).filter(Boolean))).sort();
+    const uniqueCities = Array.from(new Set((initialListings || []).map(l => l.city).filter(Boolean))).sort();
 
     const handleModerate = async (listingId: string, status: "published" | "rejected") => {
         setLoadingId(listingId);
@@ -36,8 +31,6 @@ export function ModerationTable({ listings: initialListings }: ModerationTablePr
             const result = await moderateListingAction(listingId, status);
             if (result.success) {
                 toast.success(`Listing ${status === "published" ? "approved" : "rejected"} successfully.`);
-                // Update local state instead of filtering out (unless it's a specific "Queue" behavior)
-                // The user wants 'control', so we should show the updated status
                 setListings(prev => prev.map(l => l.id === listingId ? { ...l, status } : l));
             } else {
                 toast.error(result.error);
@@ -49,11 +42,11 @@ export function ModerationTable({ listings: initialListings }: ModerationTablePr
         }
     };
 
-    const filteredListings = listings.filter(listing => {
+    const filteredListings = (listings || []).filter(listing => {
         const matchesSearch =
-            listing.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            listing.seller?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            listing.id.includes(searchTerm);
+            (listing.title || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (listing.seller?.full_name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (listing.id || "").includes(searchTerm);
 
         if (!matchesSearch) return false;
 
@@ -119,51 +112,48 @@ export function ModerationTable({ listings: initialListings }: ModerationTablePr
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr className="bg-slate-900/50 text-xs text-slate-500 uppercase tracking-wider font-semibold border-b border-white/5">
-                                <th className="py-4 px-6">Bike Details</th>
-                                <th className="py-4 px-6">Seller</th>
-                                <th className="py-4 px-6">Status</th>
-                                <th className="py-4 px-6">Price</th>
-                                <th className="py-4 px-6 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-white/5">
+                <div className="w-full">
+                    <div className="flex bg-slate-900/50 text-xs text-slate-500 uppercase tracking-wider font-semibold border-b border-white/5 py-4">
+                        <div className="w-[30%] px-6">Bike Details</div>
+                        <div className="w-[20%] px-6">Seller</div>
+                        <div className="w-[15%] px-6">Status</div>
+                        <div className="w-[15%] px-6">Price</div>
+                        <div className="w-[20%] px-6 text-right">Actions</div>
+                    </div>
+
+                    {filteredListings.length > 0 ? (
+                        <div className="max-h-[640px] overflow-y-auto">
                             {filteredListings.map((listing) => (
-                                <tr key={listing.id} className="group hover:bg-white/[0.02] transition-colors">
-                                    <td className="py-4 px-6">
-                                        <div className="flex items-center gap-4">
-                                            <div className="relative h-12 w-12 rounded-lg overflow-hidden border border-white/10 bg-slate-800 flex-shrink-0">
-                                                {listing.images?.[0] ? (
-                                                    <Image
-                                                        src={listing.images[0]}
-                                                        alt={listing.title}
-                                                        fill
-                                                        className="object-cover"
-                                                    />
-                                                ) : (
-                                                    <Bike className="h-6 w-6 text-slate-600 absolute inset-0 m-auto" />
-                                                )}
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <span className="text-white font-medium line-clamp-1">{listing.title}</span>
-                                                <span className="text-[10px] text-slate-500 flex items-center gap-1 mt-1">
-                                                    <MapPin className="h-3 w-3" /> {listing.city || "Multi-location"}
-                                                </span>
-                                            </div>
+                                <div key={listing.id} className="flex border-b border-white/5 hover:bg-white/[0.02] transition-colors items-center text-sm">
+                                    <div className="w-[30%] py-4 px-6 flex items-center gap-4">
+                                        <div className="relative h-10 w-10 rounded-lg overflow-hidden border border-white/10 bg-slate-800 flex-shrink-0">
+                                            {listing.images?.[0] ? (
+                                                <Image
+                                                    src={listing.images[0]}
+                                                    alt={listing.title}
+                                                    fill
+                                                    className="object-cover"
+                                                />
+                                            ) : (
+                                                <Bike className="h-5 w-5 text-slate-600 absolute inset-0 m-auto" />
+                                            )}
                                         </div>
-                                    </td>
-                                    <td className="py-4 px-6">
-                                        <div className="flex flex-col">
-                                            <span className="text-sm text-slate-300 flex items-center gap-1">
+                                        <div className="flex flex-col overflow-hidden">
+                                            <span className="text-white font-medium truncate">{listing.title}</span>
+                                            <span className="text-[10px] text-slate-500 flex items-center gap-1 mt-1">
+                                                <MapPin className="h-3 w-3" /> {listing.city || "Multi-location"}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="w-[20%] py-4 px-6">
+                                        <div className="flex flex-col overflow-hidden">
+                                            <span className="text-sm text-slate-300 flex items-center gap-1 truncate">
                                                 <User className="h-3 w-3" /> {listing.seller?.full_name || "Unknown"}
                                             </span>
-                                            <span className="text-[10px] text-slate-500">{listing.seller?.email}</span>
+                                            <span className="text-[10px] text-slate-500 truncate">{listing.seller?.email}</span>
                                         </div>
-                                    </td>
-                                    <td className="py-4 px-6">
+                                    </div>
+                                    <div className="w-[15%] py-4 px-6">
                                         <Badge variant="outline" className={`
                                             uppercase text-[10px] tracking-wide border
                                             ${listing.status === 'published' ? 'text-green-400 border-green-400/20 bg-green-400/5' :
@@ -172,14 +162,14 @@ export function ModerationTable({ listings: initialListings }: ModerationTablePr
                                         `}>
                                             {listing.status === 'published' ? 'Live' : listing.status}
                                         </Badge>
-                                    </td>
-                                    <td className="py-4 px-6">
+                                    </div>
+                                    <div className="w-[15%] py-4 px-6">
                                         <div className="flex items-center font-bold text-brand-400">
                                             <IndianRupee className="h-3 w-3" />
-                                            <span>{listing.price.toLocaleString("en-IN")}</span>
+                                            <span>{Number(listing.price || 0).toLocaleString("en-IN")}</span>
                                         </div>
-                                    </td>
-                                    <td className="py-4 px-6 text-right">
+                                    </div>
+                                    <div className="w-[20%] py-4 px-6 text-right">
                                         <div className="flex justify-end gap-1">
                                             <Button
                                                 size="sm"
@@ -225,18 +215,16 @@ export function ModerationTable({ listings: initialListings }: ModerationTablePr
                                                 </Button>
                                             )}
                                         </div>
-                                    </td>
-                                </tr>
+                                    </div>
+                                </div>
                             ))}
-                        </tbody>
-                    </table>
+                        </div>
+                    ) : (
+                        <div className="py-20 text-center">
+                            <p className="text-slate-500">No listings found matching filters.</p>
+                        </div>
+                    )}
                 </div>
-
-                {filteredListings.length === 0 && (
-                    <div className="py-20 text-center">
-                        <p className="text-slate-500">No listings found matching filters.</p>
-                    </div>
-                )}
             </div>
         </div>
     );

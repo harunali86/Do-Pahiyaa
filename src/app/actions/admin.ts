@@ -5,6 +5,7 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { requireAdminAccess } from "@/lib/auth/authorization";
 import { AdminService } from "@/lib/services/admin.service";
 import { revalidatePath } from "next/cache";
+import type { AuctionStatus } from "@/types/domain";
 
 async function logAudit(
     adminClient: any,
@@ -239,4 +240,71 @@ export async function sendBroadcastAction(formData: FormData) {
         console.error("Broadcast Action Error:", error);
         return { success: false, error: error.message || "Failed to send broadcast" };
     }
+}
+
+const ADMIN_MANAGEABLE_AUCTION_STATUSES: AuctionStatus[] = [
+    "scheduled",
+    "live",
+    "paused",
+    "ended",
+    "cancelled",
+];
+
+export async function updateAuctionStatusAction(auctionId: string, nextStatus: AuctionStatus) {
+    const ctx = await requireAdminContext();
+    if (!ctx.ok) return { success: false, error: ctx.error };
+
+    if (!auctionId) {
+        return { success: false, error: "Auction id is required" };
+    }
+
+    if (!ADMIN_MANAGEABLE_AUCTION_STATUSES.includes(nextStatus)) {
+        return { success: false, error: "Invalid auction status transition" };
+    }
+
+    const { data: previous } = await ctx.adminClient
+        .from("auctions")
+        .select("id, status, end_time")
+        .eq("id", auctionId)
+        .maybeSingle();
+
+    if (!previous) {
+        return { success: false, error: "Auction not found" };
+    }
+
+    const updatePayload: Record<string, unknown> = {
+        status: nextStatus,
+        updated_at: new Date().toISOString(),
+    };
+
+    if (nextStatus === "live" && previous.end_time) {
+        const endTime = new Date(previous.end_time);
+        if (Number.isFinite(endTime.getTime()) && endTime.getTime() <= Date.now()) {
+            updatePayload.end_time = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
+        }
+    }
+
+    const { error } = await ctx.adminClient
+        .from("auctions")
+        .update(updatePayload)
+        .eq("id", auctionId);
+
+    if (error) {
+        return { success: false, error: error.message };
+    }
+
+    await logAudit(
+        ctx.adminClient,
+        ctx.user.id,
+        "UPDATE_AUCTION_STATUS",
+        "auction",
+        auctionId,
+        { status: previous.status },
+        { status: nextStatus }
+    );
+
+    revalidatePath("/admin/auctions");
+    revalidatePath("/auctions");
+    revalidatePath(`/auctions/${auctionId}`);
+    return { success: true };
 }

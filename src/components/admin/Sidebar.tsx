@@ -5,10 +5,13 @@ import type { Route } from "next";
 import { usePathname } from "next/navigation";
 import {
     LayoutDashboard,
+    BarChart3,
     Users,
     ShieldAlert,
     Gavel,
     SlidersHorizontal,
+    Flag,
+    KeyRound,
     Settings,
     LogOut
 } from "lucide-react";
@@ -16,11 +19,14 @@ import { cn } from "@/lib/utils";
 
 const adminLinks: Array<{ name: string; href: string; icon: typeof LayoutDashboard }> = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+    { name: "Revenue", href: "/admin/revenue", icon: BarChart3 },
     { name: "Users", href: "/admin/users", icon: Users },
+    { name: "Roles", href: "/admin/roles", icon: KeyRound },
     { name: "KYC Review", href: "/admin/kyc", icon: ShieldAlert },
     { name: "CRM (Leads)", href: "/admin/leads", icon: Users },
     { name: "Pricing Engine", href: "/admin/pricing", icon: SlidersHorizontal },
     { name: "Lead Packs", href: "/admin/leads/subscriptions", icon: ShieldAlert }, // Reusing ShieldAlert or similar
+    { name: "Feature Flags", href: "/admin/feature-flags", icon: Flag },
     { name: "Moderation", href: "/admin/moderation", icon: ShieldAlert },
     { name: "Live Auctions", href: "/admin/auctions", icon: Gavel },
     { name: "Settings", href: "/admin/settings", icon: Settings },

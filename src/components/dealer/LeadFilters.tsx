@@ -14,7 +14,11 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export function LeadFilters() {
+type LeadFiltersProps = {
+    activeTab: "market" | "myleads";
+};
+
+export function LeadFilters({ activeTab }: LeadFiltersProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -23,10 +27,11 @@ export function LeadFilters() {
     const [make, setMake] = useState(searchParams.get("make") || "");
     const [city, setCity] = useState(searchParams.get("city") || "");
     const [status, setStatus] = useState(searchParams.get("status") || "all");
-    const [tab, setTab] = useState(searchParams.get("tab") || "market");
+    const [dateFilter, setDateFilter] = useState(searchParams.get("date") || "all");
+    const tab = activeTab;
 
     const applyFilters = () => {
-        const params = new URLSearchParams(searchParams);
+        const params = new URLSearchParams(searchParams.toString());
 
         // Sync Tab
         params.set("tab", tab);
@@ -41,6 +46,7 @@ export function LeadFilters() {
         } else {
             if (search) params.set("search", search); else params.delete("search");
             if (status && status !== 'all') params.set("status", status); else params.delete("status");
+            if (dateFilter && dateFilter !== 'all') params.set("date", dateFilter); else params.delete("date");
             // Clear irrelevant
             params.delete("make");
             params.delete("city");
@@ -60,20 +66,37 @@ export function LeadFilters() {
     // Trigger update on select changes immediately
     useEffect(() => {
         applyFilters();
-    }, [make, city, status, tab]);
+    }, [make, city, status, dateFilter, tab]);
 
     const handleClear = () => {
         setSearch("");
         setMake("");
         setCity("");
         setStatus("all");
+        setDateFilter("all");
         router.replace(`?tab=${tab}`);
+    };
+
+    const handleTabChange = (nextTab: string) => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set("tab", nextTab);
+
+        if (nextTab === "market") {
+            params.delete("status");
+            params.delete("search");
+            params.delete("date");
+        } else {
+            params.delete("make");
+            params.delete("city");
+        }
+
+        router.replace(`?${params.toString()}`, { scroll: false });
     };
 
     return (
         <div className="space-y-4">
             {/* Tab Switcher - Controlled here to sync with URL */}
-            <Tabs value={tab} onValueChange={setTab} className="w-full">
+            <Tabs value={tab} onValueChange={handleTabChange} className="w-full">
                 <TabsList className="bg-slate-900 border border-white/10 p-1 w-full md:w-auto">
                     <TabsTrigger value="market" className="data-[state=active]:bg-brand-600 data-[state=active]:text-white px-6">Buy Leads</TabsTrigger>
                     <TabsTrigger value="myleads" className="data-[state=active]:bg-brand-600 data-[state=active]:text-white px-6">My Unlocked Leads</TabsTrigger>
@@ -134,10 +157,23 @@ export function LeadFilters() {
                                 </SelectContent>
                             </Select>
                         </div>
+                        <div className="w-full md:w-[200px]">
+                            <Select value={dateFilter} onValueChange={setDateFilter}>
+                                <SelectTrigger className="bg-slate-800 border-white/10">
+                                    <SelectValue placeholder="Filter by Date" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Time</SelectItem>
+                                    <SelectItem value="today">Today</SelectItem>
+                                    <SelectItem value="last7days">Last 7 Days</SelectItem>
+                                    <SelectItem value="last30days">Last 30 Days</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </>
                 )}
 
-                {(search || make || city || (status && status !== 'all')) && (
+                {(search || make || city || (status && status !== 'all') || (dateFilter && dateFilter !== 'all')) && (
                     <Button variant="ghost" onClick={handleClear} className="text-slate-400 hover:text-white">
                         <X className="h-4 w-4 mr-2" /> Clear
                     </Button>

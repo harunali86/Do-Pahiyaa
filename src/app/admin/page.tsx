@@ -6,16 +6,14 @@ import {
     Zap,
     Clock,
     Globe,
-    ArrowUpRight,
-    TrendingUp,
     Bike
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AdminService } from "@/lib/services/admin.service";
+import { formatINR } from "@/lib/utils";
 import { AdminRevenueChart } from "@/components/admin/AdminRevenueChart";
 import { SystemHealthGauge } from "@/components/admin/SystemHealthGauge";
 import { UserGrowthChart } from "@/components/admin/UserGrowthChart";
-import { AdminService } from "@/lib/services/admin.service";
-import { formatINR } from "@/lib/utils";
 
 export default async function AdminDashboard() {
     const [stats, liveActivity] = await Promise.all([

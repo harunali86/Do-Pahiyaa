@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { BillingService } from "@/lib/services/billing.service";
+import { PaymentService } from "@/lib/services/payment.service";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api-response";
 import { z } from "zod";
@@ -8,7 +8,6 @@ const verifyPaymentSchema = z.object({
     razorpay_order_id: z.string(),
     razorpay_payment_id: z.string(),
     razorpay_signature: z.string(),
-    credits: z.number().int().positive(),
 });
 
 export async function POST(req: NextRequest) {
@@ -21,10 +20,12 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         const details = verifyPaymentSchema.parse(body);
 
-        const result = await BillingService.verifyPayment({
-            ...details,
-            dealerId: user.id,
-        });
+        const result = await PaymentService.verifyPayment(
+            user.id,
+            details.razorpay_order_id,
+            details.razorpay_payment_id,
+            details.razorpay_signature
+        );
 
         return apiSuccess(result);
     } catch (error) {

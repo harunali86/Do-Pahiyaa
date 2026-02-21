@@ -1,6 +1,5 @@
 import Hero from "@/components/marketplace/Hero";
 import ListingCard from "@/components/marketplace/ListingCard";
-import { demoListings } from "@/lib/demo/mock-data";
 import { ArrowRight, Flame, ShieldCheck, Zap, Search, Handshake, FileCheck2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -40,12 +39,11 @@ export default async function Home() {
     let displayListings: any[] = [];
     try {
       const { listings: dbListings } = await ListingService.getListings({ limit: 12 }).catch(() => ({ listings: [] }));
-      const normalizedMock = normalizeListings(demoListings);
       const normalizedReal = normalizeListings(dbListings || []);
-      displayListings = [...normalizedReal, ...normalizedMock];
+      displayListings = normalizedReal;
     } catch (e) {
       console.error("Home Data Fetch Error:", e);
-      displayListings = normalizeListings(demoListings);
+      displayListings = [];
     }
 
     const featuredListings = displayListings.slice(0, 6);

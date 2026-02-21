@@ -18,9 +18,9 @@ interface BuyCreditsModalProps {
 }
 
 const CREDIT_PACKAGES = [
-    { credits: 10, price: 4999, label: "Starter" },
-    { credits: 50, price: 19999, label: "Pro" },
-    { credits: 100, price: 34999, label: "Enterprise" },
+    { credits: 100, label: "Starter" },
+    { credits: 250, label: "Pro" },
+    { credits: 500, label: "Enterprise" },
 ];
 
 export default function BuyCreditsModal({ isOpen, onClose }: BuyCreditsModalProps) {
@@ -36,22 +36,21 @@ export default function BuyCreditsModal({ isOpen, onClose }: BuyCreditsModalProp
             const res = await fetch("/api/billing/order", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ credits: pkg.credits, amount: pkg.price }),
+                body: JSON.stringify({ leadQuantity: pkg.credits }),
             });
             const data = await res.json();
-            if (!data.success) throw new Error(data.error || "Failed to create order");
+            if (!data.success) throw new Error(data.error?.message || "Failed to create order");
             const { order } = data.data;
 
             if (!res.ok) throw new Error("Failed to create order");
 
             // 2. Open Razorpay
             const options = {
-                key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-                amount: order.amount,
+                key: order.keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
                 currency: order.currency,
                 name: "Do Pahiyaa",
                 description: `${pkg.credits} Lead Credits`,
-                order_id: order.id,
+                order_id: order.orderId,
                 handler: async function (response: any) {
                     // 3. Verify Payment
                     const verifyRes = await fetch("/api/billing/verify", {
@@ -61,16 +60,16 @@ export default function BuyCreditsModal({ isOpen, onClose }: BuyCreditsModalProp
                             razorpay_order_id: response.razorpay_order_id,
                             razorpay_payment_id: response.razorpay_payment_id,
                             razorpay_signature: response.razorpay_signature,
-                            credits: pkg.credits
                         }),
                     });
 
-                    if (verifyRes.ok) {
+                    const verifyData = await verifyRes.json();
+                    if (verifyRes.ok && verifyData.success) {
                         toast.success("Payment Successful! Credits added.");
                         onClose();
                         router.refresh();
                     } else {
-                        toast.error("Payment verification failed.");
+                        toast.error(verifyData.error?.message || "Payment verification failed.");
                     }
                 },
                 prefill: {
@@ -124,7 +123,7 @@ export default function BuyCreditsModal({ isOpen, onClose }: BuyCreditsModalProp
                                 <p className="text-xs text-slate-500 uppercase font-semibold tracking-wider">{pkg.label}</p>
                             </div>
                             <div className="text-right">
-                                <p className="text-xl font-bold text-white">₹{pkg.price}</p>
+                                <p className="text-sm font-semibold text-slate-300">Dynamic Pricing</p>
                                 <button className="mt-2 text-xs font-medium text-brand-400 group-hover:text-brand-300">
                                     Buy Now &rarr;
                                 </button>

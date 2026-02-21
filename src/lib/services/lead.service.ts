@@ -1,6 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { ConfigService } from "@/lib/services/config.service";
 import { WhatsAppService } from "@/lib/services/whatsapp.service";
 
 // Lean select constants — only fetch what's needed (GEMINI.md Rule 3.1: No N+1)
@@ -50,13 +49,20 @@ export class LeadService {
             .eq("id", listingId)
             .single();
 
-        // Trigger notification to listing owner (fire-and-forget)
-        this.notifyListingOwner(supabase, listingId, buyerId).catch(() => { });
+        const tasks: Promise<unknown>[] = [
+            this.notifyListingOwner(supabase, listingId, buyerId),
+        ];
 
-        // Trigger Real-time Allocation to Subscribers (fire-and-forget)
         if (listing && data?.id) {
-            this.allocateLead(data.id, listing, data.created_at).catch(e => console.error("Allocation Error:", e));
+            tasks.push(this.allocateLead(data.id, listing, data.created_at));
         }
+
+        const taskResults = await Promise.allSettled(tasks);
+        taskResults.forEach((result, index) => {
+            if (result.status === "rejected") {
+                console.error(`Post-inquiry task ${index + 1} failed:`, result.reason);
+            }
+        });
 
         return data;
     }
@@ -86,7 +92,7 @@ export class LeadService {
 
     /**
      * Allocate a new lead to dealers with matching active subscriptions.
-     * Matches if LeadAttributes (City, Make, Model) contains SubscriptionFilters.
+     * Uses v3 allocator with config-driven mode and cap.
      */
     static async allocateLead(
         leadId: string,
@@ -106,24 +112,30 @@ export class LeadService {
             lead_type: listing.specs?.lead_type || "buy_used"
         };
 
-        // 2. Allocate via server-side matcher RPC (faster + transactional)
-        const { data, error } = await admin.rpc("allocate_new_lead_v2", {
+        const { data, error } = await admin.rpc("allocate_new_lead_v3", {
             p_lead_id: leadId,
             p_lead_attributes: leadAttributes,
             p_lead_created_at: createdAt || new Date().toISOString(),
         });
 
         if (error) {
-            console.error("Allocation RPC failed:", error);
-            return;
+            await admin.from("lead_allocation_failures").insert({
+                lead_id: leadId,
+                source: "LeadService.allocateLead",
+                payload: leadAttributes,
+                error_message: error.message,
+            });
+            throw new Error(`Allocation RPC failed: ${error.message}`);
         }
 
         const allocated = Array.isArray(data?.allocated) ? data.allocated : [];
-        for (const item of allocated) {
-            if (item?.dealerId) {
-                this.sendUnlockNotifications(admin, leadId, item.dealerId).catch(() => { });
-            }
-        }
+        await Promise.allSettled(
+            allocated.map((item: any) =>
+                item?.dealerId
+                    ? this.sendUnlockNotifications(admin, leadId, item.dealerId)
+                    : Promise.resolve()
+            )
+        );
     }
 
     private static async resolveRegionForCity(admin: any, city?: string) {
@@ -138,91 +150,34 @@ export class LeadService {
     }
 
     /**
-     * Dealer unlocks a lead to view contact details.
-     * Uses optimistic locking via credits_balance check (GEMINI.md Rule 4.1).
+     * Dealer unlocks a lead using atomic DB transaction (unlock_lead_v3).
      */
     static async unlockLead(dealerId: string, leadId: string) {
         const supabase = await createSupabaseServerClient();
+        const { data: rpcData, error } = await supabase.rpc("unlock_lead_v3", {
+            p_lead_id: leadId,
+        });
 
-        // 1. Get dynamic unlock price from admin config
-        const unlockCost = await ConfigService.getConfigNumber("lead_unlock_price", 1);
-
-        // 2. Verify Dealer & Credits (single query)
-        let { data: dealer, error: dealerError } = await supabase
-            .from("dealers")
-            .select("credits_balance, subscription_status")
-            .eq("profile_id", dealerId)
-            .single();
-
-        // 2b. Auto-create dealer if missing (Self-healing for onboarding)
-        if (!dealer || dealerError) {
-            const { data: newDealer, error: createError } = await supabase
-                .from("dealers")
-                .insert({
-                    profile_id: dealerId,
-                    credits_balance: 500, // Onboarding bonus
-                    business_name: "My Dealership",
-                })
-                .select("credits_balance, subscription_status")
-                .single();
-
-            if (createError) throw new Error("Failed to initialize dealer account: " + createError.message);
-            dealer = newDealer;
+        if (error) {
+            throw new Error(`Unlock failed: ${error.message}`);
         }
 
-        if (dealer.credits_balance < unlockCost) {
-            throw new Error(`Insufficient credits. Need ${unlockCost}, have ${dealer.credits_balance}.`);
+        if (!rpcData?.success) {
+            throw new Error(rpcData?.message || "Unlock failed");
         }
 
-        // 3. Check idempotency — already unlocked?
-        const { data: existingUnlock } = await supabase
-            .from("unlock_events")
-            .select("id")
-            .eq("lead_id", leadId)
-            .eq("dealer_id", dealerId)
-            .maybeSingle();
-
-        if (existingUnlock) {
-            return { success: true, message: "Already unlocked", alreadyUnlocked: true };
+        if (!rpcData?.alreadyUnlocked) {
+            this.sendUnlockNotifications(supabase, leadId, dealerId).catch((notifyError) =>
+                console.error("Notification Error:", notifyError)
+            );
         }
 
-        // 4. Optimistic credit deduction (GEMINI.md Rule 4.1)
-        const { data: updated, error: deductError } = await supabase
-            .from("dealers")
-            .update({ credits_balance: dealer.credits_balance - unlockCost })
-            .eq("profile_id", dealerId)
-            .eq("credits_balance", dealer.credits_balance) // Optimistic lock
-            .select("credits_balance")
-            .single();
-
-        if (deductError || !updated) {
-            throw new Error("Credit deduction failed — concurrent update detected. Please retry.");
-        }
-
-        // 5. Record unlock event
-        const { error: unlockError } = await supabase
-            .from("unlock_events")
-            .insert({ lead_id: leadId, dealer_id: dealerId, cost_credits: unlockCost });
-
-        if (unlockError) {
-            // Rollback credit (best effort)
-            await supabase
-                .from("dealers")
-                .update({ credits_balance: dealer.credits_balance })
-                .eq("profile_id", dealerId);
-            throw new Error("Unlock failed. Credits refunded.");
-        }
-
-        // 6. Update lead status
-        await supabase
-            .from("leads")
-            .update({ status: "unlocked" })
-            .eq("id", leadId);
-
-        // 7. Send WhatsApp Notifications (Fire-and-forget)
-        this.sendUnlockNotifications(supabase, leadId, dealerId).catch(e => console.error("Notification Error:", e));
-
-        return { success: true, creditsRemaining: updated.credits_balance, cost: unlockCost };
+        return {
+            success: true,
+            creditsRemaining: rpcData?.creditsRemaining,
+            cost: rpcData?.cost || 0,
+            alreadyUnlocked: Boolean(rpcData?.alreadyUnlocked),
+        };
     }
 
     /**
@@ -360,23 +315,46 @@ export class LeadService {
      * Get accessible unlocked leads for the dealer.
      * Includes filtering by status or search.
      */
-    static async getUnlockedLeads(dealerId: string, filters?: { status?: string; search?: string }) {
+    static async getUnlockedLeads(dealerId: string, filters?: { status?: string; search?: string; date?: string }) {
         const admin = createSupabaseAdminClient();
 
         // Step 1: Get unlock events
-        const { data: events, error } = await admin
+        let eventQuery = admin
             .from('unlock_events')
             .select('id, created_at, lead_id')
             .eq('dealer_id', dealerId)
             .order('created_at', { ascending: false });
+
+        if (filters?.date && filters.date !== 'all') {
+            const now = new Date();
+            let startDate = new Date();
+            if (filters.date === 'today') {
+                startDate.setHours(0, 0, 0, 0);
+            } else if (filters.date === 'last7days') {
+                startDate.setDate(now.getDate() - 7);
+            } else if (filters.date === 'last30days') {
+                startDate.setDate(now.getDate() - 30);
+            }
+            eventQuery = eventQuery.gte('created_at', startDate.toISOString());
+        }
+
+        const { data: events, error } = await eventQuery;
 
         if (error || !events?.length) {
             if (error) console.error("getUnlockedLeads error:", error);
             return [];
         }
 
+        const dedupedEventsMap = new Map<string, any>();
+        for (const event of events) {
+            if (!dedupedEventsMap.has(event.lead_id)) {
+                dedupedEventsMap.set(event.lead_id, event);
+            }
+        }
+        const dedupedEvents = Array.from(dedupedEventsMap.values());
+
         // Step 2: Get lead details with buyer & listing info
-        const leadIds = events.map((e: any) => e.lead_id);
+        const leadIds = dedupedEvents.map((e: any) => e.lead_id);
         let leadQuery = admin
             .from('leads')
             .select('id, created_at, status, buyer_id, listing_id')
@@ -396,14 +374,14 @@ export class LeadService {
 
         const [{ data: buyers }, { data: listings }] = await Promise.all([
             admin.from('profiles').select('id, full_name, phone, email').in('id', buyerIds),
-            admin.from('listings').select('id, title, make, city, price, images').in('id', listingIds),
+            admin.from('listings').select('id, title, make, model, city, price, images, year, specs').in('id', listingIds),
         ]);
 
         // Step 4: Assemble & Filter by Search (Case insensitive partial match)
         const buyerMap = Object.fromEntries((buyers || []).map((b: any) => [b.id, b]));
         const listingMap = Object.fromEntries((listings || []).map((l: any) => [l.id, l]));
 
-        let results = events.map((e: any) => {
+        let results = dedupedEvents.map((e: any) => {
             const lead = leads.find(l => l.id === e.lead_id);
             if (!lead) return null;
             return {
@@ -422,8 +400,15 @@ export class LeadService {
             results = results.filter((item: any) => {
                 const l = item.lead;
                 const buyerName = l.buyer?.full_name?.toLowerCase() || '';
+                const buyerPhone = l.buyer?.phone?.toLowerCase() || '';
                 const bikeName = l.listing?.title?.toLowerCase() || '';
-                return buyerName.includes(lowerSearch) || bikeName.includes(lowerSearch);
+                const bikeModel = l.listing?.model?.toLowerCase() || '';
+                return (
+                    buyerName.includes(lowerSearch) ||
+                    buyerPhone.includes(lowerSearch) ||
+                    bikeName.includes(lowerSearch) ||
+                    bikeModel.includes(lowerSearch)
+                );
             });
         }
 
@@ -437,9 +422,14 @@ export class LeadService {
     static async getMarketplaceLeads(dealerId: string, filters?: { make?: string; city?: string }) {
         const admin = createSupabaseAdminClient();
 
-        // Get already unlocked lead IDs
-        const { data: unlocked } = await admin.from('unlock_events').select('lead_id').eq('dealer_id', dealerId);
-        const unlockedIds = unlocked?.map((u: any) => u.lead_id) || [];
+        const [unlockResult, allocationResult] = await Promise.all([
+            admin.from("unlock_events").select("lead_id").eq("dealer_id", dealerId),
+            admin.from("lead_allocations").select("lead_id").eq("dealer_id", dealerId),
+        ]);
+        const excludedLeadIds = Array.from(new Set([
+            ...(unlockResult.data?.map((u: any) => u.lead_id) || []),
+            ...(allocationResult.data?.map((a: any) => a.lead_id) || []),
+        ]));
 
         // Get available leads
         let query = admin
@@ -448,19 +438,21 @@ export class LeadService {
             .neq('buyer_id', dealerId) // Don't show my own leads? (Buyer can't be dealer, usually)
             .order('created_at', { ascending: false });
 
-        if (unlockedIds.length > 0) {
-            query = query.not('id', 'in', `(${unlockedIds.join(',')})`);
-        }
-
         const { data: leads, error } = await query;
         if (error) console.error("getMarketplaceLeads error:", error);
         if (!leads?.length) return [];
 
+        const excludedLeadIdSet = new Set(excludedLeadIds);
+        const visibleLeads = excludedLeadIdSet.size > 0
+            ? leads.filter((lead: any) => !excludedLeadIdSet.has(lead.id))
+            : leads;
+        if (!visibleLeads.length) return [];
+
         // Get listing details to filter by Make/City
-        const listingIds = [...new Set(leads.map((l: any) => l.listing_id))];
+        const listingIds = [...new Set(visibleLeads.map((l: any) => l.listing_id))];
         let listingQuery = admin
             .from('listings')
-            .select('id, title, make, city, price, images')
+            .select('id, title, make, model, city, price, images, year, specs')
             .in('id', listingIds);
 
         if (filters?.make && filters.make !== 'all') {
@@ -478,7 +470,7 @@ export class LeadService {
         const listingMap = Object.fromEntries(listings.map((l: any) => [l.id, l]));
 
         // Filter leads that correspond to fetched listings
-        return leads.map((l: any) => {
+        return visibleLeads.map((l: any) => {
             const listing = listingMap[l.listing_id];
             if (!listing) return null; // Filtered out
             return {
@@ -503,7 +495,10 @@ export class LeadService {
             .select(`
                 *,
                 buyer:profiles!buyer_id(id, full_name, email, phone),
-                listing:listings!inner(id, title, price, city, make, model, seller_id),
+                listing:listings!inner(
+                    id, title, price, city, make, model, seller_id,
+                    seller:profiles!listings_seller_id_fkey(full_name, email)
+                ),
                 unlock_events(id, dealer_id, unlocked_at, dealer:dealers(business_name))
             `, { count: "exact" });
 
@@ -546,21 +541,8 @@ export class LeadService {
             return { leads: [], metadata: { total: 0, page: 1, totalPages: 0 } };
         }
 
-        // 2. Fetch Sellers (Listing Owners) manually if needed, or rely on listing.seller_id
-        // To get Seller Name, we need another join or separate fetch. 
-        // Let's do a quick separate fetch for seller profiles to keep the main query clean-ish
-        const sellerIds = [...new Set(leads.map(l => l.listing?.seller_id).filter(Boolean))];
-        const { data: sellers } = await admin
-            .from("profiles")
-            .select("id, full_name, email")
-            .in("id", sellerIds);
-
-        const sellerMap = new Map(sellers?.map(s => [s.id, s]) || []);
-
-        // 3. Transform Data for UI
+        // 2. Transform Data for UI (single DB join path, no post-fetch seller query)
         const results = leads.map(lead => {
-            const sellerKey = lead.listing?.seller_id;
-            const seller = sellerMap.get(sellerKey);
             const unlockedBy = lead.unlock_events?.[0]; // Assuming 1 unlock per lead for now, or take first
 
             return {
@@ -579,7 +561,7 @@ export class LeadService {
                     city: lead.listing?.city,
                     make: lead.listing?.make,
                     model: lead.listing?.model,
-                    seller_name: seller?.full_name || "Unknown Seller"
+                    seller_name: lead.listing?.seller?.full_name || "Unknown Seller"
                 },
                 unlocked_by: unlockedBy ? {
                     dealer_name: unlockedBy.dealer?.business_name || "Unknown Dealer",

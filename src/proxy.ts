@@ -24,6 +24,7 @@ export async function proxy(request: NextRequest) {
     const supabase = createServerClient(
         env.NEXT_PUBLIC_SUPABASE_URL,
         env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+
         {
             cookies: {
                 getAll() {
@@ -36,11 +37,14 @@ export async function proxy(request: NextRequest) {
                     cookiesToSet.forEach(({ name, value }) =>
                         request.cookies.set(name, value)
                     )
-                    response = NextResponse.next({ request })
+                    response = NextResponse.next({
+                        request,
+                    })
                     cookiesToSet.forEach(({ name, value, options }) =>
                         response.cookies.set(name, value, options)
                     )
                 },
+
             },
         }
     )
@@ -48,7 +52,7 @@ export async function proxy(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
     const path = request.nextUrl.pathname;
 
-    // 2. Application Logic (Rate Limiting)
+    // 3. Application Logic (Rate Limiting)
     // Skip static files for rate limiting
     if (!path.startsWith("/_next") && !path.includes(".")) {
         const isApiRoute = path.startsWith("/api");

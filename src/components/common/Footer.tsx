@@ -3,14 +3,10 @@
 import Link from "next/link";
 import {
     Facebook,
-    Twitter, // Retained as it was in the original import, though not explicitly used in the provided Footer snippet
     Instagram,
     Linkedin,
-    Youtube,
     Mail,
-    MapPin,
-    Phone,
-    Send
+    Phone
 } from "lucide-react";
 
 export default function Footer() {
@@ -72,9 +68,11 @@ export default function Footer() {
                 <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] text-slate-600 uppercase tracking-widest">
                     <p>© 2026 Do Pahiyaa. Powered by Harun Shaikh.</p>
                     <div className="flex gap-6">
+                        <Link href="/help" className="hover:text-slate-400 transition-colors">Help</Link>
+                        <Link href="/trust-safety" className="hover:text-slate-400 transition-colors">Trust</Link>
                         <Link href="/privacy" className="hover:text-slate-400 transition-colors">Privacy</Link>
                         <Link href="/terms" className="hover:text-slate-400 transition-colors">Terms</Link>
-                        <Link href="/sitemap" className="hover:text-slate-400 transition-colors">Sitemap</Link>
+                        <Link href="/sitemap.xml" className="hover:text-slate-400 transition-colors">Sitemap</Link>
                     </div>
                 </div>
             </div>
@@ -82,7 +80,13 @@ export default function Footer() {
     );
 }
 
-function SocialLink({ icon: Icon, href }: { icon: any, href: string }) {
+function SocialLink({
+    icon: Icon,
+    href,
+}: {
+    icon: React.ComponentType<{ className?: string }>;
+    href: string;
+}) {
     return (
         <a
             href={href}
@@ -90,15 +94,5 @@ function SocialLink({ icon: Icon, href }: { icon: any, href: string }) {
         >
             <Icon className="w-5 h-5" />
         </a>
-    );
-}
-
-function FooterLink({ href, children }: { href: string, children: React.ReactNode }) {
-    return (
-        <li>
-            <Link href={href} className="hover:text-brand-400 transition-colors block w-fit">
-                {children}
-            </Link>
-        </li>
     );
 }

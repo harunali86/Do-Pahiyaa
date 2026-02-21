@@ -3,8 +3,7 @@ export const dynamic = "force-dynamic";
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { createBrowserClient } from "@supabase/ssr";
-import { env } from "@/lib/env";
+import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { createListingAction } from "@/app/actions/listings";
 import { toast } from "sonner";
 import {
@@ -51,10 +50,7 @@ export default function NewInventoryPage() {
         { id: 4, title: "Review", icon: CheckCircle2 }
     ];
 
-    const supabase = createBrowserClient(
-        env.NEXT_PUBLIC_SUPABASE_URL,
-        env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    );
+    const supabase = createSupabaseBrowserClient();
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;

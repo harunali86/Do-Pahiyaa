@@ -3,13 +3,10 @@ export const dynamic = "force-dynamic";
 import { AdminService } from "@/lib/services/admin.service";
 import { AdminSubscriptionTable } from "@/components/admin/leads/AdminSubscriptionTable";
 
-interface AdminSubscriptionsPageProps {
-    searchParams: { [key: string]: string | string[] | undefined };
-}
-
-export default async function AdminSubscriptionsPage({ searchParams }: AdminSubscriptionsPageProps) {
-    const page = Number(searchParams.page) || 1;
-    const status = typeof searchParams.status === 'string' ? searchParams.status : undefined;
+export default async function AdminSubscriptionsPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+    const resolvedParams = await searchParams;
+    const page = Number(resolvedParams.page) || 1;
+    const status = typeof resolvedParams.status === 'string' ? resolvedParams.status : undefined;
 
     // Fetch subscriptions via AdminService
     const { subscriptions, metadata } = await AdminService.getAllSubscriptions({
