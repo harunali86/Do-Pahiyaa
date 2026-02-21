@@ -11,17 +11,19 @@ export async function proxy(request: NextRequest) {
         },
     })
 
-    // --- AUTH BYPASS FOR DEMO (Requested by User) ---
-    // Globally disabling auth checks to allow direct access to all panels without removing code.
-    const isDemoMode = true;
-    if (isDemoMode) return response;
-    // ------------------------------------------------
+    // 1. Public routes bypass (webhooks, OTP API — no auth needed)
+    const publicBypass = [
+        "/api/webhooks/",
+        "/api/auth/otp/",
+    ];
+    if (publicBypass.some(p => request.nextUrl.pathname.startsWith(p))) {
+        return response;
+    }
 
-    // 1. Supabase Session Setup
+    // 2. Supabase Session Setup
     const supabase = createServerClient(
         env.NEXT_PUBLIC_SUPABASE_URL,
         env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-
         {
             cookies: {
                 getAll() {
@@ -31,33 +33,17 @@ export async function proxy(request: NextRequest) {
                     }))
                 },
                 setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
-                    cookiesToSet.forEach(({ name, value, options }) =>
+                    cookiesToSet.forEach(({ name, value }) =>
                         request.cookies.set(name, value)
                     )
-                    response = NextResponse.next({
-                        request,
-                    })
+                    response = NextResponse.next({ request })
                     cookiesToSet.forEach(({ name, value, options }) =>
                         response.cookies.set(name, value, options)
                     )
                 },
-
             },
         }
     )
-
-    // --- DEMO SESSION BYPASS ---
-    const demoSession = request.cookies.get("demo-session")?.value;
-    if (demoSession) {
-        // If they have a demo session, let them pass for demo routes
-        if (demoSession === 'admin' && request.nextUrl.pathname.startsWith('/admin')) {
-            return response;
-        }
-        if (demoSession === 'dealer' && request.nextUrl.pathname.startsWith('/dealer')) {
-            return response;
-        }
-    }
-    // ---------------------------
 
     const { data: { user } } = await supabase.auth.getUser()
     const path = request.nextUrl.pathname;
