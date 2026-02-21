@@ -27,33 +27,27 @@ export default function LoginPage() {
         const email = formData.get("email") as string;
         const password = formData.get("password") as string;
 
-        // --- MOCK LOGIN FOR DEMO (Requested by User) ---
-        if (email === 'admin@dopahiyaa.com' && password === 'admin123') {
-            toast.success("Login Successful (Demo Mode)");
-            document.cookie = "demo-session=admin; path=/; max-age=3600";
-            window.location.href = '/admin';
-            return;
-        }
-        if (email === 'dealer@dopahiyaa.com' && password === 'dealer123') {
-            toast.success("Login Successful (Demo Mode)");
-            document.cookie = "demo-session=dealer; path=/; max-age=3600";
-            window.location.href = '/dealer/dashboard';
-            return;
-        }
-        // ----------------------------------------------
-
-
-
         try {
+            // 1. Verfiy with Secure Backend Route (Brute force & Audit logs)
+            const res = await fetch("/api/auth/admin/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.error || "Login verification failed");
+            }
+
+            // 2. Set Local Supabase Session
             const supabase = createSupabaseBrowserClient();
-            const { error } = await supabase.auth.signInWithPassword({
+            const { error: sessionError } = await supabase.auth.signInWithPassword({
                 email,
                 password,
             });
 
-            if (error) throw error;
-            // ... rest of the existing logic
-
+            if (sessionError) throw sessionError;
 
             // Fetch role to redirect correctly
             const { data: { user } } = await supabase.auth.getUser();
@@ -63,7 +57,7 @@ export default function LoginPage() {
                 .eq('id', user?.id)
                 .single();
 
-            toast.success("Welcome back!");
+            toast.success(data.message || "Welcome back!");
 
             if (profile?.role === 'dealer') {
                 router.push('/dealer/dashboard');
