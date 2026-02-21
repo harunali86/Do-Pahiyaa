@@ -1,72 +1,40 @@
-import { NextRequest, NextResponse } from "next/server";
-
-// The verify token we configure in Meta Dashboard
-const VERIFY_TOKEN = process.env.META_WEBHOOK_VERIFY_TOKEN || "dopahiyaa_webhook_secret";
+export const dynamic = 'force-dynamic';
 
 /**
- * Handle GET requests for Webhook Verification
- * Meta will send a GET request to verify the webhook URL.
+ * Handle Meta Webhook Verification (GET)
  */
-export async function GET(req: NextRequest) {
-    try {
-        const url = new URL(req.url);
-        const mode = url.searchParams.get("hub.mode");
-        const token = url.searchParams.get("hub.verify_token");
-        const challenge = url.searchParams.get("hub.challenge");
+export async function GET(request: Request) {
+    const { searchParams } = new URL(request.url);
 
-        // Check if mode and token are present
-        if (mode && token) {
-            if (mode === "subscribe" && token === VERIFY_TOKEN) {
-                console.log("✅ Webhook verified successfully!");
-                // Respond with the challenge to verify
-                // Must return text/plain for the challenge
-                return new NextResponse(challenge, {
-                    status: 200,
-                    headers: { "Content-Type": "text/plain" },
-                });
-            }
+    const mode = searchParams.get('hub.mode');
+    const token = searchParams.get('hub.verify_token');
+    const challenge = searchParams.get('hub.challenge');
 
-            console.warn("❌ Webhook verification failed. Token mismatch.");
-            // Respond with 403 Forbidden if verify tokens do not match
-            return new NextResponse("Forbidden", { status: 403 });
-        }
+    // fallback to hardcoded secret if env is not set
+    const VERIFY_TOKEN = process.env.META_WEBHOOK_VERIFY_TOKEN || "dopahiyaa_webhook_secret";
 
-        return new NextResponse("Bad Request", { status: 400 });
-    } catch (error) {
-        console.error("Error verifying webhook:", error);
-        return new NextResponse("Internal Server Error", { status: 500 });
+    console.log('Webhook GET Request:', { mode, token });
+
+    if (mode === 'subscribe' && token === VERIFY_TOKEN) {
+        console.log('✅ Webhook verified!');
+        return new Response(challenge, {
+            status: 200,
+            headers: { 'Content-Type': 'text/plain' }
+        });
     }
+
+    return new Response('Forbidden', { status: 403 });
 }
 
 /**
- * Handle POST requests for incoming Webhook events
- * Meta will send POST requests when messages are received or statuses change.
+ * Handle Incoming Webhook Events (POST)
  */
-export async function POST(req: NextRequest) {
+export async function POST(request: Request) {
     try {
-        // Attempt to parse the incoming JSON payload
-        let body;
-        try {
-            body = await req.json();
-        } catch {
-            return new NextResponse("Invalid JSON", { status: 400 });
-        }
-
-        console.log("📥 Incoming Webhook Event:", JSON.stringify(body, null, 2));
-
-        // Verify it's a WhatsApp API event
-        if (body.object === "whatsapp_business_account") {
-            // TODO: Add logic here to process messages, update statuses in DB, etc.
-            // E.g., handling incoming messages, read receipts, delivery statuses.
-
-            // Acknowledge receipt of the webhook to Meta
-            return new NextResponse("EVENT_RECEIVED", { status: 200 });
-        }
-
-        // Return a '404 Not Found' if event is not from a WhatsApp API
-        return new NextResponse("Not Found", { status: 404 });
+        const body = await request.json();
+        console.log('📥 WABA Event:', JSON.stringify(body, null, 2));
+        return new Response('EVENT_RECEIVED', { status: 200 });
     } catch (error) {
-        console.error("Error processing webhook POST payload:", error);
-        return new NextResponse("Internal Server Error", { status: 500 });
+        return new Response('Invalid JSON', { status: 400 });
     }
 }
