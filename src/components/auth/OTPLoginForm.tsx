@@ -21,76 +21,71 @@ export default function OTPLoginForm() {
         }
 
         setLoading(true);
-        // Mock API call simulation
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        try {
+            const res = await fetch("/api/auth/otp/send", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ phone: `91${phone}` }) // Ensure country code is prefixed
+            });
 
-        setLoading(false);
-        setStep('otp');
-        toast.success("OTP Sent: 123456 (Mock)");
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Failed to send OTP");
+
+            toast.success("OTP sent successfully to your WhatsApp!");
+            setStep('otp');
+        } catch (error: any) {
+            toast.error(error.message || "Something went wrong");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleVerifyOTP = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
-
-        // Mock Verification
-        if (otp !== "123456") {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            toast.error("Invalid OTP");
-            setLoading(false);
+        if (otp.length < 6) {
+            toast.error("Please enter 6-digit OTP");
             return;
         }
 
-        // Shadow Email Logic
-        const shadowEmail = `phone_${phone}@mock.local`;
-        const shadowPassword = "mock-otp-secret-123"; // Fixed secret for mock users
-
-        const supabase = createSupabaseBrowserClient();
-
-        // 1. Try Login
-        let { data, error } = await supabase.auth.signInWithPassword({
-            email: shadowEmail,
-            password: shadowPassword,
-        });
-
-        // 2. If User Not Found -> Auto Sign Up
-        if (error && error.message.includes("Invalid login")) {
-            const signUpResult = await supabase.auth.signUp({
-                email: shadowEmail,
-                password: shadowPassword,
-                options: {
-                    data: {
-                        full_name: `User ${phone}`,
-                        phone: phone, // Store real phone in metadata
-                        role: 'user', // Default role for OTP users
-                    }
-                }
+        setLoading(true);
+        try {
+            // 1. Verify with our backend
+            const res = await fetch("/api/auth/otp/verify", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ phone: `91${phone}`, otp })
             });
 
-            if (signUpResult.error) {
-                toast.error(signUpResult.error.message);
-                setLoading(false);
-                return;
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Verification failed");
+
+            // 2. Establish Supabase Session with shadow credentials
+            const supabase = createSupabaseBrowserClient();
+            const { error: loginError } = await supabase.auth.signInWithPassword({
+                email: data.email,
+                password: data.password,
+            });
+
+            if (loginError) throw loginError;
+
+            toast.success("Login Successful!");
+
+            // 3. Sync Profile Phone (Optional but good practice)
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                await supabase.from('profiles').update({ phone }).eq('id', user.id);
+
+                // Redirect based on role
+                const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+
+                if (profile?.role === 'dealer') router.push('/dealer/dashboard');
+                else if (profile?.role === 'admin') router.push('/admin');
+                else router.push('/');
             }
-            // Auto Login after signup usually works, but check session
-            data = signUpResult.data as any;
-        } else if (error) {
-            toast.error(error.message);
+        } catch (error: any) {
+            toast.error(error.message || "Invalid OTP");
+        } finally {
             setLoading(false);
-            return;
-        }
-
-        toast.success("Login Successful!");
-
-        // 3. Sync Profile Phone (Optional but good practice)
-        if (data.user) {
-            await supabase.from('profiles').update({ phone: phone }).eq('id', data.user.id);
-
-            // Redirect based on role
-            const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single();
-            if (profile?.role === 'dealer') router.push('/dealer/dashboard');
-            else if (profile?.role === 'admin') router.push('/admin');
-            else router.push('/');
         }
     };
 
@@ -153,28 +148,25 @@ export default function OTPLoginForm() {
                                 className="w-full bg-slate-950/50 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/50 transition-all placeholder:text-slate-600 font-mono text-lg tracking-widest text-center"
                                 placeholder="• • • • • •"
                                 required
-                                autoFocus
                             />
                         </div>
-                        <p className="text-xs text-center text-slate-500 mt-2">Mock Code: <b>123456</b></p>
-                    </div>
 
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-brand-500/25 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
-                    >
-                        {loading ? (
-                            <>
-                                <Loader2 className="w-5 h-5 animate-spin" />
-                                Verifying...
-                            </>
-                        ) : (
-                            <>
-                                Verify & Login <ArrowRight className="w-5 h-5" />
-                            </>
-                        )}
-                    </button>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-brand-500/25 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                        >
+                            {loading ? (
+                                <>
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    Verifying...
+                                </>
+                            ) : (
+                                <>
+                                    Verify & Login <ArrowRight className="w-5 h-5" />
+                                </>
+                            )}
+                        </button>
                 </form>
             )}
         </div>
