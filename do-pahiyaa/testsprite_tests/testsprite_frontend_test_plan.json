@@ -1,0 +1,1251 @@
+[
+  {
+    "id": "TC001",
+    "title": "View God Mode Dashboard metrics and visualizations while authenticated",
+    "description": "Verifies an authenticated admin can access the dashboard and see revenue chart, activity heatmap, and live event feed rendered with data.",
+    "category": "God Mode Dashboard",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"dashboard\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Revenue\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"User Activity\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Live Event Feed\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "Revenue area chart loads and shows a non-empty state",
+    "description": "Verifies the revenue area chart section is present and displays a loaded (not empty/error) state for an authenticated admin.",
+    "category": "God Mode Dashboard",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Revenue\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Loading\" is not visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"No data\" is not visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Error\" is not visible"
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "User activity heatmap renders in a loaded state",
+    "description": "Verifies the activity heatmap section is visible and does not present an empty or error state after authentication.",
+    "category": "God Mode Dashboard",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"User Activity\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Loading\" is not visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"No activity\" is not visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Error\" is not visible"
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "Live event feed shows recent events after login",
+    "description": "Verifies the live event feed section becomes populated with visible event entries for an authenticated admin.",
+    "category": "God Mode Dashboard",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Live Event Feed\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Wait for the live event feed list to appear"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Live event feed list\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"No recent events\" is not visible"
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "Dashboard shows an authentication error when session is not valid",
+    "description": "Verifies the dashboard UI displays an unauthorized/permission error message when the user is not authenticated (invalid or expired session).",
+    "category": "God Mode Dashboard",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"invalid.user@example.com\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"wrong-password\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Invalid\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Unauthorized\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/login\""
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "Dashboard metrics section displays a visible error state on load failure",
+    "description": "Verifies the metrics area shows a user-visible error message if metrics cannot be loaded (as communicated by the UI).",
+    "category": "God Mode Dashboard",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "action",
+        "description": "Wait for the metrics section to finish attempting to load"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Revenue\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Unable to load\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Try again\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "Login and view Listings table with sticky header and initial data loaded",
+    "description": "Verifies an admin can log in and reach the listings table where rows render and the header remains visible while scrolling.",
+    "category": "Data Management (Advanced Tables)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to \"/login\""
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/listings\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Listings\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Scroll to the bottom of the listings table"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"table header\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "Sort Listings by Created At and verify order indicator changes",
+    "description": "Verifies the table supports sorting by a column and shows a visible sort state change.",
+    "category": "Data Management (Advanced Tables)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to \"/login\""
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/listings\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Created\" or \"Created At\" column header"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Created/Created At sort indicator\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Created\" or \"Created At\" column header"
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "Select multiple listings and verify bulk actions become available",
+    "description": "Verifies multi-row selection works and reveals bulk action controls when more than one row is selected.",
+    "category": "Data Management (Advanced Tables)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to \"/login\""
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/listings\""
+      },
+      {
+        "type": "action",
+        "description": "Click the selection checkbox for the first row"
+      },
+      {
+        "type": "action",
+        "description": "Click the selection checkbox for the second row"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Bulk actions\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "Bulk delete selected listings and verify success feedback",
+    "description": "Verifies bulk delete can be executed for selected rows and a visible success result is shown.",
+    "category": "Data Management (Advanced Tables)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to \"/login\""
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/listings\""
+      },
+      {
+        "type": "action",
+        "description": "Click the selection checkbox for the first row"
+      },
+      {
+        "type": "action",
+        "description": "Click the selection checkbox for the second row"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Delete\" bulk action button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Deleted\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "Attempt bulk delete with no rows selected and verify validation message",
+    "description": "Verifies the UI prevents bulk delete when nothing is selected and shows an error or disabled state feedback.",
+    "category": "Data Management (Advanced Tables)",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to \"/login\""
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/listings\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Bulk actions\" control"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Select at least one\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "Open Quick Look drawer from a row and verify inline edit UI appears",
+    "description": "Verifies a row can be opened in a Quick Look drawer and editable fields are visible for inline editing.",
+    "category": "Data Management (Advanced Tables)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to \"/login\""
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/listings\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the first row in the listings table"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Quick Look\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Edit\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC013",
+    "title": "Inline edit a field in Quick Look and verify visible save confirmation",
+    "description": "Verifies an inline edit can be made in the Quick Look drawer and the UI shows a successful save state.",
+    "category": "Data Management (Advanced Tables)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to \"/login\""
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/listings\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the first row in the listings table"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"Updated via UI test\" into the \"Title\" field in the Quick Look drawer"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Save\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Saved\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC014",
+    "title": "Cancel out of Quick Look edits and verify changes are not applied visually",
+    "description": "Verifies cancel/close behavior does not visually apply unsaved edits in the drawer.",
+    "category": "Data Management (Advanced Tables)",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to \"/login\""
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/listings\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the first row in the listings table"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"Unsaved change\" into the \"Title\" field in the Quick Look drawer"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Cancel\" or \"Close\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Quick Look\" is not visible"
+      }
+    ]
+  },
+  {
+    "id": "TC015",
+    "title": "Persist Superbike Orange theme from admin settings and verify it applies across reload",
+    "description": "Verifies an admin can switch to the Superbike Orange theme in settings and the choice persists after a page reload.",
+    "category": "Theme Overhaul — \"Superbike Orange\"",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Log in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Settings\" in the main navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Theme\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Superbike Orange\" from the Theme dropdown"
+      }
+    ]
+  },
+  {
+    "id": "TC016",
+    "title": "Verify Superbike Orange theme is visibly applied after selection",
+    "description": "Verifies the UI indicates that the Superbike Orange theme is active immediately after selecting it.",
+    "category": "Theme Overhaul — \"Superbike Orange\"",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Log in\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Settings\" in the main navigation"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Superbike Orange\" from the Theme dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Superbike Orange\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Theme\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC017",
+    "title": "Theme selection persists after browser refresh",
+    "description": "Verifies that once Superbike Orange is selected, refreshing the page keeps the theme selection visible in settings.",
+    "category": "Theme Overhaul — \"Superbike Orange\"",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Log in\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Settings\" in the main navigation"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Superbike Orange\" from the Theme dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Press \"Enter\""
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      }
+    ]
+  },
+  {
+    "id": "TC018",
+    "title": "Unsupported theme value is not accepted via UI (no unsupported option present)",
+    "description": "Verifies the UI prevents selecting an unsupported theme value by not offering it as an option.",
+    "category": "Theme Overhaul — \"Superbike Orange\"",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Log in\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Settings\" in the main navigation"
+      },
+      {
+        "type": "action",
+        "description": "Click on the Theme dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"unsupported_value\" is not visible"
+      }
+    ]
+  },
+  {
+    "id": "TC019",
+    "title": "Theme toggle is available only after login (access to settings requires authenticated session)",
+    "description": "Verifies that the theme setting is reachable and visible for an authenticated admin user.",
+    "category": "Theme Overhaul — \"Superbike Orange\"",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Log in\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Settings\" in the main navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Theme\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Theme dropdown\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC020",
+    "title": "Show success toast after confirming a destructive action (Ban User)",
+    "description": "Verifies that confirming a destructive action results in a visible success toast notification.",
+    "category": "Toast Notifications & Confirmation Dialogs",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the admin page where a user can be managed (Users management screen)."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Ban\" is visible."
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Ban\" for a user row."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Confirm\" is visible."
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Confirm\" in the confirmation dialog."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"User banned\" is visible."
+      }
+    ]
+  },
+  {
+    "id": "TC021",
+    "title": "Cancel destructive action does not perform action and shows no success toast",
+    "description": "Verifies that canceling a confirmation dialog prevents the destructive action and does not show a success toast.",
+    "category": "Toast Notifications & Confirmation Dialogs",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the admin page where a user can be managed (Users management screen)."
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Ban\" for a user row."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Are you sure\" is visible."
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Cancel\" in the confirmation dialog."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"User banned\" is not visible."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Confirmation dialog\" is not visible."
+      }
+    ]
+  },
+  {
+    "id": "TC022",
+    "title": "Confirmation dialog blocks destructive action until confirmed",
+    "description": "Verifies that the confirmation dialog appears and the action is not executed until the user confirms.",
+    "category": "Toast Notifications & Confirmation Dialogs",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the admin page where a listing can be managed (Listings management screen)."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Delete\" is visible."
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Delete\" for a listing row."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Confirm\" is visible."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"This action cannot be undone\" is visible."
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Cancel\" in the confirmation dialog."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Deleted\" is not visible."
+      }
+    ]
+  },
+  {
+    "id": "TC023",
+    "title": "Toast can be dismissed manually",
+    "description": "Verifies that a visible toast notification can be closed by the user.",
+    "category": "Toast Notifications & Confirmation Dialogs",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the admin page where a user can be managed (Users management screen)."
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Ban\" for a user row."
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Confirm\" in the confirmation dialog."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"User banned\" is visible."
+      },
+      {
+        "type": "action",
+        "description": "Click on the toast close button (X) on the \"User banned\" toast."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"User banned\" is not visible."
+      }
+    ]
+  },
+  {
+    "id": "TC024",
+    "title": "Only one confirmation dialog is shown at a time",
+    "description": "Verifies that repeated clicks on a destructive action do not open multiple stacked confirmation dialogs.",
+    "category": "Toast Notifications & Confirmation Dialogs",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the admin page where a listing can be managed (Listings management screen)."
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Delete\" for a listing row."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Confirmation dialog\" is visible."
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Delete\" again while the confirmation dialog is open."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Confirmation dialog\" is visible."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Confirm\" is visible."
+      }
+    ]
+  },
+  {
+    "id": "TC025",
+    "title": "Toast message content matches the completed action",
+    "description": "Verifies that the toast message corresponds to the specific destructive action that was confirmed.",
+    "category": "Toast Notifications & Confirmation Dialogs",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the admin page where a listing can be managed (Listings management screen)."
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Delete\" for a listing row."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Delete listing\" is visible."
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Confirm\" in the confirmation dialog."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Listing deleted\" is visible."
+      }
+    ]
+  },
+  {
+    "id": "TC026",
+    "title": "Search listings with query and multiple filters returns visible results and pagination",
+    "description": "Verifies that a user can search with text plus Brand/City/Price Max filters and see results with pagination controls.",
+    "category": "Marketplace Search",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the marketplace search page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Search\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Royal Enfield\" into the search field"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Royal Enfield\" from the Brand dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Delhi\" from the City dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Type \"150000\" into the Maximum Price field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Search\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Results\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC027",
+    "title": "Search by query only returns results relevant to the entered text",
+    "description": "Verifies full-text search works when only the query is provided and results update accordingly.",
+    "category": "Marketplace Search",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the marketplace search page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Search\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Royal Enfield\" into the search field"
+      },
+      {
+        "type": "action",
+        "description": "Press Enter"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Results\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Royal Enfield\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC028",
+    "title": "Filter by Brand only narrows the results",
+    "description": "Verifies that selecting a Brand filter without a query narrows visible results accordingly.",
+    "category": "Marketplace Search",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the marketplace search page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Brand\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Royal Enfield\" from the Brand dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Search\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Results\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Royal Enfield\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC029",
+    "title": "Filter by City only narrows the results",
+    "description": "Verifies that selecting a City filter without a query narrows visible results accordingly.",
+    "category": "Marketplace Search",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the marketplace search page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"City\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Delhi\" from the City dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Search\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Results\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Delhi\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC030",
+    "title": "Filter by maximum price only constrains results to the entered ceiling",
+    "description": "Verifies that entering a maximum price applies the filter and returns results with prices not exceeding the ceiling (as displayed).",
+    "category": "Marketplace Search",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the marketplace search page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Maximum Price\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Type \"150000\" into the Maximum Price field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Search\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Results\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Price\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC031",
+    "title": "Invalid maximum price input shows a visible validation error state",
+    "description": "Verifies that a non-numeric maximum price input is rejected with a user-visible error message or validation indicator.",
+    "category": "Marketplace Search",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the marketplace search page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Maximum Price\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Type \"not_a_number\" into the Maximum Price field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Search\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Invalid\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Results\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC032",
+    "title": "Paginate to next page of results and verify the page changes",
+    "description": "Verifies that pagination controls allow navigating to the next page and that the UI indicates a different page of results.",
+    "category": "Marketplace Search",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the marketplace search page"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Search\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Next\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Next\" pagination control"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Previous\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Results\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC033",
+    "title": "Clear filters resets the search inputs and results state",
+    "description": "Verifies that clearing filters removes selected values and returns to an unfiltered results view.",
+    "category": "Marketplace Search",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the marketplace search page"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Royal Enfield\" from the Brand dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Delhi\" from the City dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Type \"150000\" into the Maximum Price field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Clear\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Royal Enfield\" is not visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Delhi\" is not visible"
+      }
+    ]
+  }
+]

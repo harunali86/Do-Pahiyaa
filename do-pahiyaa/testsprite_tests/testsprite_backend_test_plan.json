@@ -1,0 +1,22 @@
+[
+  {
+    "id": "TC001",
+    "title": "admin login success and failure",
+    "description": "Test the /api/auth/admin/login endpoint with valid admin credentials to receive a 200 status and JWT token, and with invalid credentials to receive a 401 Unauthorized response."
+  },
+  {
+    "id": "TC002",
+    "title": "lead unlock with sufficient and insufficient credits",
+    "description": "Test the /api/leads/unlock POST endpoint with a valid leadId and dealer token when the dealer has sufficient credits to receive contact info and remaining credits, and when the dealer has zero credits to receive a 402 Insufficient Credits response."
+  },
+  {
+    "id": "TC003",
+    "title": "razorpay webhook signature verification and processing",
+    "description": "Test the /api/webhooks/razorpay POST endpoint with a valid Razorpay event payload and valid X-Razorpay-Signature header to receive a 200 Acknowledge response, and with an invalid or missing signature header to receive a 400 Bad Request."
+  },
+  {
+    "id": "TC004",
+    "title": "marketplace search with valid and invalid filters",
+    "description": "Test the /api/listings GET endpoint with valid query parameters including q, brand, city, and price_max to receive a 200 response with listings and pagination metadata, and with invalid price_max parameter to receive a 422 Unprocessable Entity response."
+  }
+]
