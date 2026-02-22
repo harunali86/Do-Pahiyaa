@@ -75,10 +75,9 @@ export default function OTPLoginForm() {
                 // Redirect based on role
                 const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
 
+                // OTP login is ONLY for buyers & dealers. Admin uses email/password.
                 if (profile?.role === 'dealer') router.push('/dealer/dashboard');
-                else if (profile?.role === 'admin' || profile?.role === 'super_admin' || profile?.role === 'super-admin') {
-                    router.push('/admin');
-                } else router.push('/');
+                else router.push('/'); // Buyer goes to home
             }
         } catch (error: any) {
             toast.error(error.message || "Invalid OTP");
