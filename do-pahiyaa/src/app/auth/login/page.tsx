@@ -64,7 +64,7 @@ export default function LoginPage() {
 
             if (profile?.role === 'dealer') {
                 router.push('/dealer/dashboard');
-            } else if (profile?.role === 'admin' || profile?.role === 'super_admin') {
+            } else if (profile?.role === 'admin' || profile?.role === 'super_admin' || profile?.role === 'super-admin') {
                 router.push('/admin');
             } else {
                 router.push('/'); // Buyer goes to home

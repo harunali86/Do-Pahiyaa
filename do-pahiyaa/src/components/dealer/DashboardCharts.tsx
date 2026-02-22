@@ -41,20 +41,9 @@ export function DashboardCharts({ leadStats, inventoryStats }: DashboardChartsPr
         { name: "Sold", value: inventoryStats.find(s => s.status === 'sold')?.count || 0, color: COLORS.brandDark },
     ].filter(d => d.value > 0);
 
-    // Mock data if empty to show something
-    const showMockLeads = leadData.length === 0;
-    const finalLeadData = showMockLeads ? [
-        { name: "New", value: 5, color: COLORS.blue },
-        { name: "Unlocked", value: 3, color: COLORS.brand },
-        { name: "Converted", value: 2, color: COLORS.green }
-    ] : leadData;
-
-    const showMockInventory = inventoryData.length === 0;
-    const finalInventoryData = showMockInventory ? [
-        { name: "Published", value: 8, color: COLORS.green },
-        { name: "Draft", value: 4, color: COLORS.slate },
-        { name: "Sold", value: 3, color: COLORS.brandDark }
-    ] : inventoryData;
+    // Simplified: No mock data allowed in production.
+    const finalLeadData = leadData;
+    const finalInventoryData = inventoryData;
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -71,8 +60,8 @@ export function DashboardCharts({ leadStats, inventoryStats }: DashboardChartsPr
                                 key={r}
                                 onClick={() => setRange(r)}
                                 className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${range === r
-                                        ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/20'
-                                        : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                    ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/20'
+                                    : 'text-slate-400 hover:text-white hover:bg-white/5'
                                     }`}
                             >
                                 {r.charAt(0).toUpperCase() + r.slice(1)}

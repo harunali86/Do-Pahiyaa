@@ -27,19 +27,6 @@ export default function Navbar() {
         const getUser = async () => {
             const { data: { session } } = await supabase.auth.getSession();
 
-            // --- DEMO MODE UI MOCKING ---
-            const isDemoMode = true;
-            if (isDemoMode && !session?.user && typeof window !== 'undefined') {
-                const demoSession = document.cookie.split('; ').find(row => row.startsWith('demo-session='))?.split('=')[1];
-                if (demoSession) {
-                    setUser({
-                        id: 'demo-id',
-                        user_metadata: { full_name: demoSession === 'admin' ? 'Demo Admin' : 'Demo Dealer' }
-                    });
-                    setUserRole(demoSession as UserRole);
-                    return;
-                }
-            }
             // ---------------------------
 
             setUser(session?.user ?? null);
@@ -83,8 +70,6 @@ export default function Navbar() {
     const publicLinks = [
         { name: "Marketplace", href: "/" },
         { name: "Sell Bike", href: "/sell" },
-        { name: "Dealer Panel", href: "/dealer/dashboard" }, // Temporary: Show to everyone
-        { name: "Admin Panel", href: "/admin" }, // Temporary: Show to everyone
     ];
 
     // Role-specific dashboard link (Keep this for highlighting, but links are now public in menu)

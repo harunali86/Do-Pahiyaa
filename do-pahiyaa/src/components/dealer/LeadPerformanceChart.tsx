@@ -17,21 +17,23 @@ export function LeadPerformanceChart() {
     React.useEffect(() => {
         setMounted(true);
         const days = range === "week" ? 7 : range === "month" ? 30 : 12;
+        // In production, we don't show fake random points. 
+        // Real data integration will go here, currently returning 0 for new accounts.
         const newData = Array.from({ length: days }).map((_, i) => {
             const d = new Date();
             if (range === "year") {
                 d.setMonth(d.getMonth() - (11 - i));
                 return {
                     date: format(d, 'MMM'),
-                    leads: Math.floor(Math.random() * 50) + 20,
-                    views: Math.floor(Math.random() * 200) + 100,
+                    leads: 0,
+                    views: 0,
                 };
             }
             d.setDate(d.getDate() - (range === "week" ? (6 - i) : (29 - i)));
             return {
                 date: format(d, 'MMM dd'),
-                leads: Math.floor(Math.random() * (range === "week" ? 15 : 10)) + 5,
-                views: Math.floor(Math.random() * 50) + 20,
+                leads: 0,
+                views: 0,
             };
         });
         setData(newData);
