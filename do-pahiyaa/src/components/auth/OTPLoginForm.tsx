@@ -76,8 +76,9 @@ export default function OTPLoginForm() {
                 const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
 
                 if (profile?.role === 'dealer') router.push('/dealer/dashboard');
-                else if (profile?.role === 'admin') router.push('/admin');
-                else router.push('/');
+                else if (profile?.role === 'admin' || profile?.role === 'super_admin' || profile?.role === 'super-admin') {
+                    router.push('/admin');
+                } else router.push('/');
             }
         } catch (error: any) {
             toast.error(error.message || "Invalid OTP");

@@ -15,7 +15,13 @@ export async function getUserRoleAction() {
         .eq("id", session.user.id)
         .single();
 
-    return profile?.role || "user";
+    // Normalize admin roles for frontend consistency
+    // DB may store 'super_admin' or 'super-admin', but UI expects 'admin'
+    const rawRole = profile?.role || "user";
+    if (rawRole === "super_admin" || rawRole === "super-admin") {
+        return "admin";
+    }
+    return rawRole;
 }
 
 

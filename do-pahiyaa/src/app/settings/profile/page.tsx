@@ -145,12 +145,12 @@ export default function ProfileSettingsPage() {
     if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-brand-500 w-8 h-8" /></div>;
 
     const isDealer = profile?.role === "dealer";
-    const isAdmin = profile?.role === "admin" || profile?.role === "super_admin";
+    const isAdmin = profile?.role === "admin" || profile?.role === "super_admin" || profile?.role === "super-admin";
 
     const tabs: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
         { id: "general", label: "General Profile", icon: <User className="w-4 h-4" /> },
         { id: "security", label: "Security", icon: <Lock className="w-4 h-4" /> },
-        { id: "danger", label: "Danger Zone", icon: <Trash2 className="w-4 h-4" /> },
+        ...(!isAdmin ? [{ id: "danger" as const, label: "Danger Zone", icon: <Trash2 className="w-4 h-4" /> }] : []),
     ];
 
     return (
@@ -419,7 +419,7 @@ export default function ProfileSettingsPage() {
                     )}
 
                     {/* =================== DANGER ZONE TAB =================== */}
-                    {activeTab === "danger" && (
+                    {activeTab === "danger" && !isAdmin && (
                         <div className="space-y-6">
                             <div className="glass-panel p-6 rounded-2xl border border-red-500/20 bg-red-500/5 space-y-6">
                                 <div className="flex items-start gap-4">
