@@ -22,7 +22,7 @@ export default function OTPLoginForm() {
 
         setLoading(true);
         try {
-            const res = await fetch("/api/auth/otp/send", {
+            const res = await fetch("/api/v1/auth/otp/send", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ phone: `91${phone}` }) // Ensure country code is prefixed
@@ -50,7 +50,7 @@ export default function OTPLoginForm() {
         setLoading(true);
         try {
             // 1. Verify with our backend
-            const res = await fetch("/api/auth/otp/verify", {
+            const res = await fetch("/api/v1/auth/otp/verify", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ phone: `91${phone}`, otp })
@@ -59,12 +59,9 @@ export default function OTPLoginForm() {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || "Verification failed");
 
-            // 2. Establish Supabase Session with shadow credentials
+            // 2. Establish Supabase Session with the returned secure session object
             const supabase = createSupabaseBrowserClient();
-            const { error: loginError } = await supabase.auth.signInWithPassword({
-                email: data.email,
-                password: data.password,
-            });
+            const { error: loginError } = await supabase.auth.setSession(data.session);
 
             if (loginError) throw loginError;
 
@@ -78,9 +75,9 @@ export default function OTPLoginForm() {
                 // Redirect based on role
                 const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
 
+                // OTP login is ONLY for buyers & dealers. Admin uses email/password.
                 if (profile?.role === 'dealer') router.push('/dealer/dashboard');
-                else if (profile?.role === 'admin') router.push('/admin');
-                else router.push('/');
+                else router.push('/'); // Buyer goes to home
             }
         } catch (error: any) {
             toast.error(error.message || "Invalid OTP");

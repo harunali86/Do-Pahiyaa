@@ -29,7 +29,7 @@ export default function LoginPage() {
 
         try {
             // 1. Verfiy with Secure Backend Route (Brute force & Audit logs)
-            const res = await fetch("/api/auth/admin/login", {
+            const res = await fetch("/api/v1/auth/admin/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, password })
@@ -51,17 +51,20 @@ export default function LoginPage() {
 
             // Fetch role to redirect correctly
             const { data: { user } } = await supabase.auth.getUser();
+            console.log("Logged in user:", user?.email);
+
             const { data: profile } = await supabase
                 .from('profiles')
                 .select('role')
                 .eq('id', user?.id)
                 .single();
 
+            console.log("User Profile Role:", profile?.role);
             toast.success(data.message || "Welcome back!");
 
             if (profile?.role === 'dealer') {
                 router.push('/dealer/dashboard');
-            } else if (profile?.role === 'admin') {
+            } else if (profile?.role === 'admin' || profile?.role === 'super_admin' || profile?.role === 'super-admin') {
                 router.push('/admin');
             } else {
                 router.push('/'); // Buyer goes to home
