@@ -46,7 +46,7 @@ export default function DashboardStats({ profile, favoritesCount, bidsCount, lea
         },
         {
             label: "Verification Status",
-            value: profile?.is_verified ? "Verified" : (profile?.status === 'pending_verification' ? "Pending" : "Not Verified"),
+            value: profile?.is_verified ? "Verified" : "Pending KYC",
             icon: ShieldCheck,
             color: profile?.is_verified ? "text-green-400" : "text-slate-400",
             bg: profile?.is_verified ? "bg-green-500/10" : "bg-slate-500/10",

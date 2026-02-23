@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { X, Loader2, Send } from "lucide-react";
 import { toast } from "sonner";
 
@@ -16,6 +17,8 @@ export default function LeadCaptureModal({ listingId, listingTitle, isOpen, onCl
     const [loading, setLoading] = useState(false);
     const [checkingStatus, setCheckingStatus] = useState(true);
     const [isUnlocked, setIsUnlocked] = useState(false);
+
+    const router = useRouter();
 
     const checkUnlockStatus = useCallback(async () => {
         try {
@@ -46,10 +49,19 @@ export default function LeadCaptureModal({ listingId, listingTitle, isOpen, onCl
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ listingId, action: "create" }),
             });
+
+            if (res.status === 401) {
+                toast.error("Please log in to unlock seller contact details.");
+                router.push(`/auth/login?next=${encodeURIComponent(`/listings/${listingId}`)}`);
+                onClose();
+                return;
+            }
+
             const { data: order } = await res.json();
 
             if (!order?.id) throw new Error("Could not initiate payment. Try again.");
 
+            // ... rest of the code remains ...
             // 2. Open Razorpay Checkout
             const options = {
                 key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,

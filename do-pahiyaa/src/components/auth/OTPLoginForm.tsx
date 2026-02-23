@@ -1,20 +1,34 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Phone, ArrowRight, Loader2, Lock } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Phone, ArrowRight, Loader2, Lock, User, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
-export default function OTPLoginForm() {
+interface OTPLoginFormProps {
+    isSignup?: boolean;
+}
+
+export default function OTPLoginForm({ isSignup = false }: OTPLoginFormProps) {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [step, setStep] = useState<'phone' | 'otp'>('phone');
     const [phone, setPhone] = useState("");
     const [otp, setOtp] = useState("");
+    const [fullName, setFullName] = useState("");
+    const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(false);
 
     const handleSendOTP = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (isSignup) {
+            if (!fullName || fullName.length < 3) {
+                toast.error("Please enter your full name.");
+                return;
+            }
+        }
         if (phone.length < 10) {
             toast.error("Please enter a valid 10-digit number");
             return;
@@ -31,8 +45,17 @@ export default function OTPLoginForm() {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || "Failed to send OTP");
 
-            toast.success("OTP sent successfully to your WhatsApp!");
-            setStep('otp');
+            if (data.success) {
+                if (process.env.NEXT_PUBLIC_MOCK_OTP === "true") {
+                    toast.success("MOCK MODE: Use code 123456...");
+                } else {
+                    toast.success("OTP sent successfully to your WhatsApp!");
+                }
+                setStep('otp');
+            } else {
+                // If res.ok is true but data.success is false, it's a custom error from the API
+                throw new Error(data.error || "Failed to send OTP");
+            }
         } catch (error: any) {
             toast.error(error.message || "Something went wrong");
         } finally {
@@ -53,7 +76,7 @@ export default function OTPLoginForm() {
             const res = await fetch("/api/v1/auth/otp/verify", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ phone: `91${phone}`, otp })
+                body: JSON.stringify({ phone: `91${phone}`, otp, fullName, email })
             });
 
             const data = await res.json();
@@ -76,8 +99,14 @@ export default function OTPLoginForm() {
                 const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
 
                 // OTP login is ONLY for buyers & dealers. Admin uses email/password.
-                if (profile?.role === 'dealer') router.push('/dealer/dashboard');
-                else router.push('/'); // Buyer goes to home
+                const nextPath = searchParams.get("next");
+                if (nextPath && nextPath.startsWith("/")) {
+                    router.push(nextPath);
+                } else if (profile?.role === 'dealer') {
+                    router.push('/dealer/dashboard');
+                } else {
+                    router.push('/'); // Buyer goes to home
+                }
             }
         } catch (error: any) {
             toast.error(error.message || "Invalid OTP");
@@ -90,6 +119,39 @@ export default function OTPLoginForm() {
         <div className="space-y-6">
             {step === 'phone' ? (
                 <form onSubmit={handleSendOTP} className="space-y-4">
+                    {isSignup && (
+                        <>
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Full Name</label>
+                                <div className="relative">
+                                    <User className="absolute left-4 top-3.5 w-5 h-5 text-slate-500" />
+                                    <input
+                                        type="text"
+                                        value={fullName}
+                                        onChange={(e) => setFullName(e.target.value)}
+                                        className="w-full bg-slate-950/50 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/50 transition-all placeholder:text-slate-600 font-medium text-lg"
+                                        placeholder="Rahul Sharma"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Email Address (Optional)</label>
+                                <div className="relative">
+                                    <Mail className="absolute left-4 top-3.5 w-5 h-5 text-slate-500" />
+                                    <input
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        className="w-full bg-slate-950/50 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/50 transition-all placeholder:text-slate-600 font-medium text-lg"
+                                        placeholder="rahul@example.com"
+                                    />
+                                </div>
+                            </div>
+                        </>
+                    )}
+
                     <div className="space-y-2">
                         <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Mobile Number</label>
                         <div className="relative">

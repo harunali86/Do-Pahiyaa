@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
     Mail,
     Lock,
@@ -17,6 +17,7 @@ import OTPLoginForm from "@/components/auth/OTPLoginForm";
 
 export default function LoginPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [loginMethod, setLoginMethod] = useState<'mobile' | 'email'>('mobile');
     const [isLoading, setIsLoading] = useState(false);
 
@@ -62,6 +63,12 @@ export default function LoginPage() {
             console.log("User Profile Role:", profile?.role);
             toast.success(data.message || "Welcome back!");
 
+            const nextPath = searchParams.get("next");
+            if (nextPath && nextPath.startsWith("/")) {
+                router.push(nextPath);
+                return;
+            }
+
             if (profile?.role === 'dealer') {
                 router.push('/dealer/dashboard');
             } else if (profile?.role === 'admin' || profile?.role === 'super_admin' || profile?.role === 'super-admin') {
@@ -104,7 +111,7 @@ export default function LoginPage() {
                             : 'text-slate-400 hover:text-white'
                             }`}
                     >
-                        Email / Admin
+                        Admin Login
                     </button>
                 </div>
 

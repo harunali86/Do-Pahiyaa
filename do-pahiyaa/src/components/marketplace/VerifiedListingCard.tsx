@@ -1,8 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
-import { MapPin, Gauge, Calendar, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { MapPin, Gauge, Calendar, ShieldCheck, CheckCircle2, GitCompare } from "lucide-react";
 import { formatINR, cn } from "@/lib/utils";
 import { defaultBlurDataURL, imageQuality, imageSizes } from "@/lib/image";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 // Lean type matching LISTING_CARD_SELECT — only what the card renders
 type ListingCardData = {
@@ -37,6 +41,47 @@ function isNonEmptyString(value: unknown): value is string {
 }
 
 export default function VerifiedListingCard({ listing }: VerifiedListingCardProps) {
+    const [isCompared, setIsCompared] = useState(false);
+
+    useEffect(() => {
+        const checkCompare = () => {
+            const stored = localStorage.getItem('compare_bikes');
+            if (stored) {
+                const ids = JSON.parse(stored);
+                setIsCompared(ids.includes(listing.id));
+            } else {
+                setIsCompared(false);
+            }
+        };
+
+        checkCompare();
+        window.addEventListener('comparison_updated', checkCompare);
+        return () => window.removeEventListener('comparison_updated', checkCompare);
+    }, [listing.id]);
+
+    const toggleCompare = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const stored = localStorage.getItem('compare_bikes');
+        const current = stored ? JSON.parse(stored) : [];
+
+        if (isCompared) {
+            const newIds = current.filter((id: string) => id !== listing.id);
+            localStorage.setItem('compare_bikes', JSON.stringify(newIds));
+            toast.info("Removed from comparison");
+        } else {
+            if (current.length >= 3) {
+                toast.error("Max 3 bikes allowed for comparison");
+                return;
+            }
+            localStorage.setItem('compare_bikes', JSON.stringify([...current, listing.id]));
+            toast.success("Added to comparison");
+        }
+
+        window.dispatchEvent(new Event('comparison_updated'));
+    };
+
     const normalizedImages = Array.isArray(listing.images)
         ? listing.images.filter(isNonEmptyString)
         : [];
@@ -115,12 +160,27 @@ export default function VerifiedListingCard({ listing }: VerifiedListingCardProp
                         {listing.seller?.is_verified && <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" />}
                     </div>
 
-                    <Link
-                        href={`/listings/${listing.id}`}
-                        className="text-sm font-medium text-brand-400 hover:text-brand-300 transition-colors"
-                    >
-                        View Details &rarr;
-                    </Link>
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={toggleCompare}
+                            className={cn(
+                                "flex items-center gap-1.5 text-xs font-semibold px-2 py-1 rounded-md transition-all border",
+                                isCompared
+                                    ? "bg-brand-500/10 border-brand-500/30 text-brand-400"
+                                    : "bg-white/5 border-white/10 text-slate-400 hover:text-white hover:bg-white/10"
+                            )}
+                        >
+                            <GitCompare className="w-3.5 h-3.5" />
+                            {isCompared ? "Compared" : "Compare"}
+                        </button>
+
+                        <Link
+                            href={`/listings/${listing.id}`}
+                            className="text-sm font-medium text-brand-400 hover:text-brand-300 transition-colors"
+                        >
+                            View Details &rarr;
+                        </Link>
+                    </div>
                 </div>
             </div>
         </div>

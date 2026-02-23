@@ -1,87 +1,64 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-    Mail,
-    Lock,
-    User,
-    ArrowRight,
-    Loader2,
-    Building2
-} from "lucide-react";
+import { User, Building2, CheckCircle2 } from "lucide-react";
+import OTPLoginForm from "@/components/auth/OTPLoginForm";
+import DealerKycForm from "@/components/auth/DealerKycForm";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { toast } from "sonner";
-import DealerKycForm from "@/components/auth/DealerKycForm";
 
 export default function SignupPage() {
     const router = useRouter();
-    const [isLoading, setIsLoading] = useState(false);
     const [role, setRole] = useState<'buyer' | 'dealer'>('buyer');
     const [step, setStep] = useState<'account' | 'kyc'>('account');
     const [createdUserId, setCreatedUserId] = useState<string | null>(null);
 
-    const handleSignup = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsLoading(true);
-        const formData = new FormData(e.target as HTMLFormElement);
-        const email = formData.get("email") as string;
-        const password = formData.get("password") as string;
-        const fullName = formData.get("fullName") as string;
-
-        try {
+    // After OTP LoginForm succeeds, we need to catch the session and advance to KYC if Dealer
+    useEffect(() => {
+        const checkSession = async () => {
             const supabase = createSupabaseBrowserClient();
+            const { data: { session } } = await supabase.auth.getSession();
 
-            // 1. Sign Up
-            const { data: authData, error: authError } = await supabase.auth.signUp({
-                email,
-                password,
-                options: {
-                    data: {
-                        full_name: fullName,
-                        role: role
+            if (session?.user && step === 'account') {
+                // The OTPLoginForm just logged the user in.
+                // If they signed up as a dealer, we need to show the KYC form now.
+                if (role === 'dealer') {
+                    setCreatedUserId(session.user.id);
+
+                    // Update their role in the profiles table to 'dealer' (it defaults to 'buyer')
+                    const { error } = await supabase
+                        .from('profiles')
+                        .update({ role: 'dealer', is_verified: false })
+                        .eq('id', session.user.id);
+
+                    if (error) {
+                        console.error("Failed to update role:", error);
                     }
-                }
-            });
 
-            if (authError) throw authError;
-
-            // 2. Create Profile
-            if (authData.user) {
-                setCreatedUserId(authData.user.id);
-                const { error: profileError } = await supabase
-                    .from('profiles')
-                    .insert({
-                        id: authData.user.id,
-                        email: email,
-                        full_name: fullName,
-                        role: role,
-                        status: role === 'dealer' ? 'pending_verification' : 'active'
-                    });
-
-                if (profileError && !profileError.message.includes('duplicate key')) {
-                    console.error(profileError);
+                    setStep('kyc');
+                } else {
+                    // Buyers are good to go, redirect to home
+                    router.push('/');
+                    router.refresh();
                 }
             }
+        };
 
-            toast.success("Account created!");
-
-            // 3. Handle multi-step for dealers
-            if (role === 'dealer') {
-                setStep('kyc');
-            } else {
-                toast.success("Redirecting...");
-                router.push('/');
-                router.refresh();
+        // Listen for auth state changes triggered by OTPLoginForm completion
+        const supabase = createSupabaseBrowserClient();
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_IN') {
+                checkSession();
             }
+        });
 
-        } catch (error: any) {
-            toast.error(error.message || "Signup failed");
-        } finally {
-            setIsLoading(false);
-        }
-    };
+        // Initial check just in case they are already logged in
+        checkSession();
+
+        return () => subscription.unsubscribe();
+    }, [role, step, router]);
 
     return (
         <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center p-4">
@@ -93,7 +70,7 @@ export default function SignupPage() {
                     </h1>
                     <p className="text-slate-400">
                         {step === 'account'
-                            ? "Join India's premium bike marketplace"
+                            ? "Join India's premium bike marketplace securely with WhatsApp"
                             : "Mandatory KYC for Verified Dealers"}
                     </p>
                 </div>
@@ -135,69 +112,9 @@ export default function SignupPage() {
                                 </button>
                             </div>
 
-                            <form onSubmit={handleSignup} className="space-y-5">
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Full Name</label>
-                                    <div className="relative">
-                                        <User className="absolute left-4 top-3 w-5 h-5 text-slate-500" />
-                                        <input
-                                            name="fullName"
-                                            type="text"
-                                            placeholder="Rahul Sharma"
-                                            className="w-full bg-slate-950/50 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/50 transition-all placeholder:text-slate-600"
-                                            required
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Email Address</label>
-                                    <div className="relative">
-                                        <Mail className="absolute left-4 top-3 w-5 h-5 text-slate-500" />
-                                        <input
-                                            name="email"
-                                            type="email"
-                                            placeholder="rahul@example.com"
-                                            className="w-full bg-slate-950/50 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/50 transition-all placeholder:text-slate-600"
-                                            required
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Password</label>
-                                    <div className="relative">
-                                        <Lock className="absolute left-4 top-3 w-5 h-5 text-slate-500" />
-                                        <input
-                                            name="password"
-                                            type="password"
-                                            placeholder="••••••••"
-                                            className="w-full bg-slate-950/50 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/50 transition-all placeholder:text-slate-600"
-                                            required
-                                        />
-                                    </div>
-                                    <p className="text-[11px] text-slate-500 px-1">
-                                        Must be at least 8 characters long.
-                                    </p>
-                                </div>
-
-                                <button
-                                    type="submit"
-                                    disabled={isLoading}
-                                    className="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-brand-500/25 transition-all active:scale-95 flex items-center justify-center gap-2 mt-4 disabled:opacity-70 disabled:cursor-not-allowed"
-                                >
-                                    {isLoading ? (
-                                        <>
-                                            <Loader2 className="w-5 h-5 animate-spin" />
-                                            Creating Account...
-                                        </>
-                                    ) : (
-                                        <>
-                                            Get Started <ArrowRight className="w-5 h-5" />
-                                        </>
-                                    )}
-                                </button>
-                            </form>
+                            <div className="animate-in fade-in zoom-in-95 duration-200">
+                                <OTPLoginForm isSignup={true} />
+                            </div>
 
                             <div className="mt-8 pt-6 border-t border-white/5 text-center">
                                 <p className="text-slate-400 text-sm">
@@ -209,14 +126,23 @@ export default function SignupPage() {
                             </div>
                         </>
                     ) : (
-                        <DealerKycForm
-                            userId={createdUserId!}
-                            onComplete={() => {
-                                toast.success("KYC Submitted! Our team will review your account.");
-                                router.push('/dealer/dashboard');
-                            }}
-                        />
+                        <div className="animate-in fade-in zoom-in-95 duration-300">
+                            <DealerKycForm
+                                userId={createdUserId!}
+                                onComplete={() => {
+                                    toast.success("KYC Submitted! Our team will review your account.");
+                                    router.push('/dealer/dashboard');
+                                }}
+                            />
+                        </div>
                     )}
+                </div>
+
+                {/* Trust Indicators */}
+                <div className="mt-8 flex justify-center gap-6 text-xs text-slate-500 opacity-60">
+                    <div className="flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3" /> WhatsApp Secure Verification
+                    </div>
                 </div>
             </div>
         </div>

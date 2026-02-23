@@ -39,12 +39,11 @@ export class KycService {
 
         if (dbError) throw dbError;
 
-        // 3. Update profile status to pending_verification if it's the first doc
+        // 3. Mark profile as not-verified until admin approves KYC
         await this.supabase
             .from('profiles')
-            .update({ status: 'pending_verification' })
-            .eq('id', userId)
-            .eq('status', 'active');
+            .update({ is_verified: false })
+            .eq('id', userId);
 
         return storageData;
     }
@@ -97,24 +96,39 @@ export class KycService {
      * Admin: Fetch all users with pending KYC
      */
     static async getPendingReviews() {
-        const { data, error } = await this.supabase
+        const { data: profiles, error: profileError } = await this.supabase
             .from('profiles')
-            .select(`
-        *,
-        kyc_documents (
-          id,
-          document_type,
-          file_url,
-          status,
-          rejection_reason,
-          created_at
-        )
-      `)
-            .eq('status', 'pending_verification')
+            .select('*')
             .eq('role', 'dealer')
+            .eq('is_verified', false)
             .order('created_at', { ascending: false });
 
-        if (error) throw error;
-        return data;
+        if (profileError) throw profileError;
+
+        const profileRows = profiles || [];
+        const userIds = profileRows.map((profile) => profile.id);
+        const docsByUserId = new Map<string, any[]>();
+
+        if (userIds.length > 0) {
+            const { data: docs, error: docsError } = await this.supabase
+                .from('kyc_documents')
+                .select('id, user_id, document_type, file_url, status, rejection_reason, created_at')
+                .in('user_id', userIds)
+                .eq('status', 'pending')
+                .order('created_at', { ascending: false });
+
+            if (docsError) throw docsError;
+
+            for (const doc of docs || []) {
+                const existingDocs = docsByUserId.get(doc.user_id) || [];
+                existingDocs.push(doc);
+                docsByUserId.set(doc.user_id, existingDocs);
+            }
+        }
+
+        return profileRows.map((profile) => ({
+            ...profile,
+            kyc_documents: docsByUserId.get(profile.id) || [],
+        })).filter((profile) => profile.kyc_documents.length > 0);
     }
 }

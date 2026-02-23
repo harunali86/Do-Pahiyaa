@@ -11,7 +11,14 @@ export async function proxy(request: NextRequest) {
         },
     })
 
-    // 1. Public routes bypass (webhooks, OTP API — no auth needed)\n    const publicBypass = [\n        "/api/v1/webhooks/",\n        "/api/v1/auth/otp/",\n    ];\n    if (publicBypass.some(p => request.nextUrl.pathname.startsWith(p))) {\n        return response;\n    }
+    // 1. Public routes bypass (webhooks, OTP API — no auth needed)
+    const publicBypass = [
+        "/api/v1/webhooks/",
+        "/api/v1/auth/otp/",
+    ];
+    if (publicBypass.some((prefix) => request.nextUrl.pathname.startsWith(prefix))) {
+        return response;
+    }
 
     // 2. Supabase Session Setup
     const supabase = createServerClient(
