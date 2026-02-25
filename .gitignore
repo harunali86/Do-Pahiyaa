@@ -1,9 +1,12 @@
 .next/
 node_modules/
-.vercel/
+.# Environment files
 .env
 .env.local
-.DS_Store
+.env.*
+*.env
+do-pahiyaa/*.env
+DS_Store
 coverage/
 *.log
 *.tsbuildinfo

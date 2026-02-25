@@ -1,5 +1,9 @@
 import AdminSidebar from "@/components/admin/Sidebar";
-import { CommandMenu } from "@/components/admin/CommandMenu";
+import dynamic from "next/dynamic";
+
+const CommandMenu = dynamic(
+    () => import("@/components/admin/CommandMenu").then(mod => ({ default: mod.CommandMenu }))
+);
 
 export default function AdminLayout({
     children,

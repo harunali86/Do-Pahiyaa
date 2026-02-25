@@ -378,4 +378,29 @@ export class AdminService {
         if (error) return [];
         return data || [];
     }
+
+    /**
+     * Adjust Dealer Credits (Admin Only)
+     * Calls the secure RPC to ensure transactional integrity and audit logging.
+     */
+    static async adjustDealerCredits(dealerProfileId: string, amount: number, reason: string) {
+        const admin = createSupabaseAdminClient();
+
+        const { data, error } = await admin.rpc("admin_adjust_dealer_balance", {
+            p_dealer_profile_id: dealerProfileId,
+            p_amount: amount,
+            p_reason: reason
+        });
+
+        if (error) {
+            console.error("[AdminService] Failed to adjust dealer credits:", error);
+            throw new Error(error.message);
+        }
+
+        if (!data?.success) {
+            throw new Error(data?.message || "Failed to adjust credits");
+        }
+
+        return data;
+    }
 }

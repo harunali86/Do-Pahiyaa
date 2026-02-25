@@ -5,6 +5,11 @@
 - Absolute project root: `/home/harun/codex`
 - Work inside this directory for all code, docs, and setup.
 
+## 1.1) Canonical PRD
+
+- Primary PRD (single source): `do-pahiyaa/docs/do-pahiyaa-prd.md`
+- Legacy PRD snapshots are retained as references in `do-pahiyaa/docs/PRD_REFERENCE.md`
+
 ## 2) Product Vision
 
 Build an industry-grade hybrid bike marketplace platform with:

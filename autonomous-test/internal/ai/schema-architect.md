@@ -1,0 +1,1 @@
+/home/harun/.gemini/antigravity/skills/schema-architect.md

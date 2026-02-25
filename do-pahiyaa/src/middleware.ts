@@ -11,6 +11,29 @@ export async function proxy(request: NextRequest) {
         },
     })
 
+    // Add security headers (Constitution §5.5)
+    const SECURITY_HEADERS: Record<string, string> = {
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "DENY",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Permissions-Policy": "camera=(), microphone=(), geolocation=(self)",
+        "X-DNS-Prefetch-Control": "on",
+        "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
+        "Content-Security-Policy": [
+            "default-src 'self'",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com",
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+            "font-src 'self' https://fonts.gstatic.com",
+            "img-src 'self' data: blob: https://*.supabase.co https://images.unsplash.com",
+            "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.razorpay.com",
+            "frame-src https://api.razorpay.com https://checkout.razorpay.com",
+        ].join("; "),
+    };
+
+    for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
+        response.headers.set(key, value);
+    }
+
     // 1. Public routes bypass (webhooks, OTP API — no auth needed)
     const publicBypass = [
         "/api/v1/webhooks/",

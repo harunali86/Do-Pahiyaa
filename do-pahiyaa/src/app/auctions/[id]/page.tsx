@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import {
     ArrowLeft,
     Clock,
@@ -16,7 +17,23 @@ import { AuctionService } from "@/lib/services/auction.service";
 import { formatINR } from "@/lib/utils";
 import { defaultBlurDataURL, imageQuality, imageSizes } from "@/lib/image";
 import Link from "next/link";
-import RealtimeAuctionEngine from "@/components/auction/RealtimeAuctionEngine";
+
+const RealtimeAuctionEngine = dynamic(
+    () => import("@/components/auction/RealtimeAuctionEngine"),
+    {
+        loading: () => (
+            <div className="glass-panel border border-white/5 p-6 h-full animate-pulse">
+                <div className="h-8 bg-slate-800 rounded w-3/4 mb-4" />
+                <div className="h-12 bg-slate-800 rounded mb-4" />
+                <div className="space-y-3">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                        <div key={i} className="h-6 bg-slate-800 rounded" />
+                    ))}
+                </div>
+            </div>
+        )
+    }
+);
 
 interface PageProps {
     params: Promise<{ id: string }>;

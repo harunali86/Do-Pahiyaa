@@ -14,8 +14,9 @@ const nextConfig: NextConfig = {
         hostname: "images.unsplash.com"
       }
     ],
-    unoptimized: true,
+    formats: ["image/avif", "image/webp"],
     qualities: [70, 75, 80],
+    minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
   },
   turbopack: {
     root: __dirname
