@@ -17,7 +17,7 @@ test.describe('Do Pahiyaa SaaS Core Flows', () => {
 
         // Click and wait for login API
         const [response] = await Promise.all([
-            page.waitForResponse(res => res.url().includes('/api/auth/admin/login') && res.status() === 200),
+            page.waitForResponse(res => res.url().includes('/api/v1/auth/admin/login') && res.status() === 200),
             page.getByRole('button', { name: /Sign In with Email/i }).click(),
         ]);
 

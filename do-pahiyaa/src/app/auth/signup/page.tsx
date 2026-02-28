@@ -8,6 +8,7 @@ import OTPLoginForm from "@/components/auth/OTPLoginForm";
 import DealerKycForm from "@/components/auth/DealerKycForm";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { toast } from "sonner";
+import GoogleAuthButton from "@/components/auth/GoogleAuthButton";
 
 export default function SignupPage() {
     const router = useRouter();
@@ -114,6 +115,17 @@ export default function SignupPage() {
 
                             <div className="animate-in fade-in zoom-in-95 duration-200">
                                 <OTPLoginForm isSignup={true} />
+
+                                {/* Google Signup Divider */}
+                                <div className="flex items-center gap-3 my-5">
+                                    <div className="flex-1 h-px bg-white/5" />
+                                    <span className="text-xs text-slate-500 font-medium">OR</span>
+                                    <div className="flex-1 h-px bg-white/5" />
+                                </div>
+                                <GoogleAuthButton
+                                    role={role}
+                                    label={role === 'dealer' ? 'Sign up as Dealer with Google' : 'Sign up with Google'}
+                                />
                             </div>
 
                             <div className="mt-8 pt-6 border-t border-white/5 text-center">

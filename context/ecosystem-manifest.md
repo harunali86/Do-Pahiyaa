@@ -36,6 +36,13 @@ Automated security loops are configured in `.github/workflows/`:
 - **`doc-sync` skill**: Use `antigravity sync-docs` to auto-maintain `/context` and `GEMINI.md`.
 - **`GEMINI.md`**: The supreme law defining clean architecture and security gates.
 
-## 🚀 5. Deployment & CI/CD
+## 🚀 6. High-Performance Advanced Skills
+The ecosystem is enhanced with elite coding protocols:
+- **`tdd-specialist`**: Strict Red-Green-Refactor development cycle.
+- **`plan-architect`**: Micro-tasking for 2-5 min atomic executions.
+- **`performance-profiler`**: Advanced N+1, memory leak, and algorithmic auditing.
+- **`harden-fortress` (v2)**: Now includes logical exploit scanning and SCA audits.
+
+## 🚀 7. Deployment & CI/CD
 - **Strategy**: Expanded zero-downtime migrations (Expand -> Migrate -> Contract).
 - **Gate**: PRs are blocked if CodeQL or Semgrep scans fail.

@@ -10,7 +10,7 @@ export class OTPService {
     // We use service role to bypass RLS for internal auth tables
     private static supabase = createClient(
         env.NEXT_PUBLIC_SUPABASE_URL,
-        process.env.SUPABASE_SERVICE_ROLE_KEY || "",
+        env.SUPABASE_SERVICE_ROLE_KEY,
         { auth: { persistSession: false } }
     );
 
@@ -50,22 +50,30 @@ export class OTPService {
                     phone,
                     otp_hash: otpHash,
                     expires_at: expiresAt.toISOString(),
-                    ip_address: ip,
                     channel: "whatsapp"
                 });
 
             if (dbError) throw dbError;
 
             // 3. Send via WhatsApp
-            // Template: dopahiyaa_otp (Body: "Your Do Pahiyaa verification code is: {{1}}. Valid for 5 minutes.")
-            const sent = await WhatsAppService.sendTemplate(phone, "dopahiyaa_otp", [
+            // Template: dopahiyaa_otp
+            // Schema: Body has 1 param {{1}}, Button is URL type with OTP param.
+            const whatsappResult = await WhatsAppService.sendTemplate(phone, "dopahiyaa_otp", [
                 {
                     type: "body",
                     parameters: [{ type: "text", text: otp }]
+                },
+                {
+                    type: "button",
+                    sub_type: "url",
+                    index: "0",
+                    parameters: [{ type: "text", text: otp }]
                 }
-            ]);
+            ], "en");
 
-            if (!sent) {
+            console.log(`[OTP] WhatsApp API response for ${phone}:`, JSON.stringify(whatsappResult, null, 2));
+
+            if (!whatsappResult) {
                 return { success: false, error: "Failed to send WhatsApp message. Please check the number." };
             }
 
@@ -73,7 +81,6 @@ export class OTPService {
             await this.supabase.from("auth_login_audit").insert({
                 phone,
                 action: "otp_sent",
-                ip_address: ip,
                 status: "success"
             });
 

@@ -3,14 +3,19 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { useState, useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
 import { Menu, X, User, LogOut, LayoutDashboard, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { CitySelector } from "./CitySelector";
 import ConfirmationDialog from "@/components/ui/confirmation-dialog";
 import { NotificationBell } from "./NotificationBell";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { useRouter } from "next/navigation";
 import { getUserRoleAction } from "@/app/actions/auth";
+
+const CitySelector = dynamic(
+    () => import("./CitySelector").then((module) => module.CitySelector),
+    { ssr: false }
+);
 
 type UserRole = "user" | "dealer" | "admin" | null;
 
@@ -58,12 +63,12 @@ export default function Navbar() {
 
     const confirmLogout = async () => {
         await supabase.auth.signOut();
-        router.refresh();
         setUser(null);
         setUserRole(null);
         roleFetchedRef.current = false;
         setShowLogoutConfirm(false);
         setIsOpen(false);
+        router.push("/auth/login");
     };
 
     // Public links (always visible)
