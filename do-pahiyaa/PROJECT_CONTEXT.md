@@ -60,6 +60,10 @@ We are in the final stages of the **₹49 C2C Monetization Engine** and **Auth R
 - **WhatsApp Template:** `dopahiyaa_otp`
 - **Rate Limit:** 20 OTPs per hour (per phone number).
 - **GitHub CLI (gh)**: `gh` is installed and authenticated for `harunali86`. Use it for PRs and checking CI/CD errors (`gh run view`).
+- **High-Performance Development Protocols**:
+    *   **TDD (Red-Green-Refactor)**: Mandatory for all new service logic.
+    *   **Micro-Tasking**: All `implementation_plan.md` tasks must be < 5 mins.
+    *   **Continuous Profiling**: Database and API bottlenecks must be benchmarked.
 - **Vercel CLI**: Authenticated for `harunali86`. Use `vercel logs` or `vercel inspect` to debug build failures.
 
 ---

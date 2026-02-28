@@ -23,7 +23,18 @@ const CITIES = [
 ];
 
 export function CitySelector() {
-    const [city, setCity] = useState("All India");
+    const [city, setCity] = useState(() => {
+        if (typeof window === "undefined") {
+            return "All India";
+        }
+
+        const storedCity = window.localStorage.getItem("user_city");
+        if (storedCity && CITIES.includes(storedCity)) {
+            return storedCity;
+        }
+
+        return "All India";
+    });
 
     const handleCityChange = (value: string) => {
         setCity(value);

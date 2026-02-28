@@ -23,3 +23,9 @@ Last updated: 2026-02-24
 - `v2` vs `v3` RPC references still appear in legacy scripts and comments.
 - Lint warnings remain (image optimization + hook dependency warnings).
 
+## IDE / Platform Bugs (Urgent)
+- **Antigravity UI Bug (v1.19.6)**: "Past Conversations" clock icon shows `🚫` (Blocked). UI handshake with history service is unstable.
+- **Agent Approval Drawer Invisible**: Approval buttons for `notify_user` and `task_boundary` are often missing even when status shows "User input required". 
+  - *Workaround*: Bypass Task Mode (Task View) or use direct chat if agent seems stuck.
+- **WABA Billing Blocker**: WhatsApp OTP delivery fails silently despite "Accepted" status if payment profile is not linked to the specific WABA account in Meta Business Suite.
+
