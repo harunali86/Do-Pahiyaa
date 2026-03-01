@@ -14,6 +14,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { toast } from "sonner";
 
 import OTPLoginForm from "@/components/auth/OTPLoginForm";
+import GoogleAuthButton from "@/components/auth/GoogleAuthButton";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -111,7 +112,7 @@ export default function LoginPage() {
                             : 'text-slate-400 hover:text-white'
                             }`}
                     >
-                        Admin Login
+                        Email / Admin
                     </button>
                 </div>
 
@@ -127,6 +128,14 @@ export default function LoginPage() {
                                 </p>
                             </div>
                             <OTPLoginForm />
+
+                            {/* Google Login Divider */}
+                            <div className="flex items-center gap-3 my-5">
+                                <div className="flex-1 h-px bg-white/5" />
+                                <span className="text-xs text-slate-500 font-medium">OR</span>
+                                <div className="flex-1 h-px bg-white/5" />
+                            </div>
+                            <GoogleAuthButton role="buyer" label="Continue with Google" />
                         </div>
                     ) : (
                         <form onSubmit={handleEmailLogin} className="space-y-6 animate-in fade-in zoom-in-95 duration-200">

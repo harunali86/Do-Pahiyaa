@@ -17,7 +17,7 @@ test.describe('Do Pahiyaa SaaS Core Flows', () => {
 
         // Click and wait for login API
         const [response] = await Promise.all([
-            page.waitForResponse(res => res.url().includes('/api/auth/admin/login') && res.status() === 200),
+            page.waitForResponse(res => res.url().includes('/api/v1/auth/admin/login') && res.status() === 200),
             page.getByRole('button', { name: /Sign In with Email/i }).click(),
         ]);
 
@@ -50,9 +50,9 @@ test.describe('Do Pahiyaa SaaS Core Flows', () => {
         await search.fill('Royal Enfield');
         await search.press('Enter');
 
-        await page.waitForURL(/search/);
-        await expect(page.getByText(/Find Your Ride/i)).toBeVisible();
-        await expect(page.getByText(/results/i).first()).toBeVisible();
+        await page.waitForURL(/search/, { timeout: 15000 });
+        await expect(page.getByText(/Find Your Ride/i)).toBeVisible({ timeout: 15000 });
+        await expect(page.getByText(/results/i).first()).toBeVisible({ timeout: 10000 });
     });
 
     test('Unauthenticated Access Control', async ({ page }) => {

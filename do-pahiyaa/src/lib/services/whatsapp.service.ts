@@ -1,4 +1,5 @@
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { env } from "@/lib/env";
 
 export class WhatsAppService {
     /**
@@ -25,8 +26,8 @@ export class WhatsAppService {
     /**
      * Send a template-based message via Meta WhatsApp Cloud API.
      */
-    static async sendTemplate(phone: string, templateName: string, components: any[] = []) {
-        const { WHATSAPP_ACCESS_TOKEN, WHATSAPP_PHONE_NUMBER_ID } = process.env;
+    static async sendTemplate(phone: string, templateName: string, components: any[] = [], languageCode: string = "en_US") {
+        const { WHATSAPP_ACCESS_TOKEN, WHATSAPP_PHONE_NUMBER_ID } = env;
 
         if (!WHATSAPP_ACCESS_TOKEN || !WHATSAPP_PHONE_NUMBER_ID) {
             console.error("[WhatsApp] Credentials missing. Message not sent.");
@@ -48,7 +49,7 @@ export class WhatsAppService {
                         type: "template",
                         template: {
                             name: templateName,
-                            language: { code: "en_US" },
+                            language: { code: languageCode },
                             components
                         }
                     })
@@ -58,11 +59,11 @@ export class WhatsAppService {
             const result = await response.json();
 
             if (response.ok) {
-                console.log(`[WhatsApp] Template '${templateName}' sent to ${phone}`);
-                return true;
+                console.log(`[WhatsApp] Template '${templateName}' sent to ${phone}:`, JSON.stringify(result, null, 2));
+                return result;
             } else {
-                console.error(`[WhatsApp] Failed to send template:`, result);
-                return false;
+                console.error(`[WhatsApp] Failed to send template:`, JSON.stringify(result, null, 2));
+                return result;
             }
         } catch (error) {
             console.error(`[WhatsApp] Network error sending template:`, error);
@@ -83,7 +84,7 @@ export class WhatsAppService {
                 ]
             }
         ];
-        return this.sendTemplate(phone, "lead_unlock_dealer", components);
+        return this.sendTemplate(phone, "lead_unlock_dealer", components, "en");
     }
 
     /**
@@ -99,7 +100,7 @@ export class WhatsAppService {
                 ]
             }
         ];
-        return this.sendTemplate(phone, "lead_unlock_buyer", components);
+        return this.sendTemplate(phone, "lead_unlock_buyer", components, "en");
     }
 
     private static async processMessages(messages: any[], contacts: any[], metadata: any) {

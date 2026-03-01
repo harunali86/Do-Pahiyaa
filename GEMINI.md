@@ -18,3 +18,17 @@
 - **Monetization Engine:** Follow the dynamic pricing and credit deduction rules strictly for lead allocation. Never update dealer credits directly on the client side.
 - **Webhook Safety:** External webhooks (Razorpay, WhatsApp/Meta) must process updates transactionally using RPCs in Supabase to ensure atomicity and idempotency.
 - **High-Volume Purchasing (Exception to Global Rule 5.1):** Dealer purchases (like lead unlock) are core revenue streams. Instead of the strict 5 req/min limit, allow high-volume throughput (e.g., 60 req/min) to prevent blocking active business, but ensure transactional locking guarantees are maintained.
+
+---
+
+## 4. ROOT CAUSE RESOLUTION (ENFORCED)
+- **Rule (Reference Global 1.8):** No Temporary Patches.
+- **Enforcement:** Every bug or issue in Do Pahiyaa must be fixed at its root cause. Applying "band-aid" patches or temporary workarounds is strictly forbidden. Explanations of the root cause are mandatory when submitting a fix.
+
+## 5. DO PAHIYAA DEPLOYMENT PIPELINE
+- **Rule (Reference Global 8.8):** Direct pushes to Vercel/Production are banned.
+- **The Required Workflow:**
+  1. **Pre-Commit Validation (Local):** Before any code is committed, Developers and Agents MUST run local verifications (`tsc`, `lint`) and complete **Playwright E2E tests** to ensure core user journeys are unbroken.
+  2. **Code Review & GitHub MCP (Trigger):** Agents MUST utilize the **GitHub MCP** to create feature branches, commit the locally verified code, and raise a Pull Request.
+  3. **Automated CI Gates:** The PR creation MUST trigger automated CI pipelines (e.g., GitHub Actions) to run a secondary execution of all tests (Playwright, Lint, Type-checks, Security). Merging is strictly blocked until CI passes.
+  4. **CD Deployment & Vercel MCP:** Post-merge, agents MUST utilize the **Vercel MCP** (or automated pipeline integrations) to manage deployments, verify Preview environment stability, and officially promote code to the Production environment.

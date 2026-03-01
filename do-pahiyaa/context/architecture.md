@@ -16,3 +16,9 @@ Next.js SaaS platform for motorcycle lead management and monetization (C2C & Dea
 
 ## Data Flow
 Buyer -> Lead Table -> Dealer Alert -> Payment -> Lead Unlock
+
+## Environment & Security
+- **Centralization**: All env access must go through `src/lib/env.ts` (validated via Zod).
+- **Fallbacks**: `APP_BASE_URL` dynamically defaults to `NEXT_PUBLIC_VERCEL_URL` on Vercel.
+- **Secrets**: `.env.local` is gitignored. No secrets allowed in git history.
+
