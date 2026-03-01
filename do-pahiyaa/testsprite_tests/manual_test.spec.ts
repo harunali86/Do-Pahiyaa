@@ -22,12 +22,12 @@ test('Homepage loads and Search works', async ({ page }) => {
     await searchInput.fill('Ducati');
     await searchInput.press('Enter');
 
-    // 4. Check URL or Results
-    await expect(page).toHaveURL(/search/);
-    // We expect some result or "No Results" but the page should load
-    // Check for "Find Your Ride" which is the heading on search page
-    await expect(page.getByText(/Find Your Ride/i)).toBeVisible();
-    await expect(page.getByText(/results/i).first()).toBeVisible();
+    // 4. Wait for navigation to /search page and verify content
+    await page.waitForURL(/search/, { timeout: 15000 });
+    // The search page server component fetches from Supabase which can be slow.
+    // Check for "Find Your Ride" heading with extended timeout.
+    await expect(page.getByText(/Find Your Ride/i)).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText(/results/i).first()).toBeVisible({ timeout: 10000 });
 });
 
 test('View Listing Details', async ({ page }) => {
